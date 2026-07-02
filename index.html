@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kế hoạch sản xuất - Quản lý nhu cầu sản xuất</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --primary-500:#07554b;
+    --primary-50:#e6eeed;
+    --bg-200:#f5f6f7;
+    --bg-100:#f3f3f6;
+    --white:#ffffff;
+    --neutral-300:#e4e6e6;
+    --neutral-400:#dbdcdc;
+    --neutral-600:#9b9c9c;
+    --neutral-700:#737676;
+    --neutral-800:#4c4d4d;
+    --neutral-950:#0a0a0a;
+    --warning-500:#f79009;
+    --warning-50:#fffaeb;
+    --blue-50:#eff8ff;
+    --blue-600:#1570ef;
+    --success-500:#12b76a;
+    --success-50:#ecfdf3;
+    --error-500:#f04438;
+    --error-50:#fef3f2;
+    --radius-2xs:4px;
+    --radius-xs:6px;
+    --radius-sm:8px;
+    --radius-full:999px;
+    --select-blue:#e7f0ff;
+    --select-blue-strong:#cfe2ff;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    color:var(--neutral-950);
+    background:var(--bg-200);
+    -webkit-font-smoothing:antialiased;
+  }
+  .app-shell{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+
+  /* ===== Header ===== */
+  .app-header{
+    height:56px;flex-shrink:0;background:var(--white);
+    border-bottom:1px solid var(--neutral-300);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:8px 16px;
+  }
+  .app-header .left{display:flex;align-items:center;gap:12px;}
+  .icon-btn{
+    width:36px;height:36px;border-radius:var(--radius-xs);
+    display:flex;align-items:center;justify-content:center;
+    background:transparent;border:none;cursor:pointer;color:var(--neutral-800);
+  }
+  .icon-btn:hover{background:var(--bg-100);}
+  .logo-title{display:flex;align-items:center;gap:8px;}
+  .logo-mark{
+    width:32px;height:32px;border-radius:8px;background:var(--primary-500);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;
+  }
+  .logo-title span{font-weight:600;font-size:16px;}
+  .header-right{display:flex;align-items:center;gap:8px;}
+  .divider-v{width:1px;height:26px;background:var(--neutral-300);}
+  .user-chip{display:flex;align-items:center;gap:10px;padding:2px 6px;border-radius:var(--radius-xs);cursor:pointer;}
+  .user-chip:hover{background:var(--bg-100);}
+  .avatar{width:30px;height:30px;border-radius:999px;background:var(--primary-500);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;}
+  .user-meta{display:flex;flex-direction:column;gap:2px;}
+  .user-meta .name{font-size:13px;line-height:16.8px;color:var(--neutral-950);}
+  .role-tag{background:var(--blue-50);color:var(--blue-600);font-size:12px;padding:2px 6px;border-radius:var(--radius-2xs);width:fit-content;}
+  .notif-dot{position:relative;}
+  .notif-dot::after{content:"";position:absolute;top:8px;right:8px;width:7px;height:7px;border-radius:999px;background:var(--error-500);border:1.5px solid #fff;}
+
+  /* ===== Body layout ===== */
+  .app-body{display:flex;flex:1;min-height:0;}
+
+  /* ===== Sidebar ===== */
+  .sidebar{
+    width:250px;flex-shrink:0;background:var(--primary-500);color:#fff;
+    display:flex;flex-direction:column;justify-content:space-between;
+    padding:16px 8px 8px;overflow-y:auto;transition:width .2s ease;
+  }
+  .menu-list{display:flex;flex-direction:column;gap:2px;}
+  .menu-item{
+    display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-xs);
+    cursor:pointer;font-size:14px;color:rgba(255,255,255,.88);white-space:nowrap;
+  }
+  .menu-item svg{flex-shrink:0;opacity:.9;}
+  .menu-item:hover{background:rgba(255,255,255,.08);}
+  .menu-item.active{background:rgba(255,255,255,.14);color:#fff;font-weight:500;}
+  .menu-item .chev{margin-left:auto;opacity:.6;}
+  .sidebar-footer{display:flex;align-items:center;gap:10px;padding:10px;color:rgba(255,255,255,.7);font-size:13px;cursor:pointer;border-top:1px solid rgba(255,255,255,.12);margin-top:8px;}
+  .sidebar-footer:hover{color:#fff;}
+
+  /* ===== Main content ===== */
+  .main-content{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;}
+  .breadcrumb{padding:16px 24px 0;font-size:13px;color:var(--neutral-700);display:flex;align-items:center;gap:6px;flex-shrink:0;}
+  .breadcrumb b{color:var(--neutral-950);font-weight:500;}
+  .content-wrap{flex:1;min-height:0;padding:16px 24px 24px;display:flex;flex-direction:column;}
+  .page-title{font-size:20px;font-weight:600;margin:8px 0 16px;flex-shrink:0;}
+
+  .card{
+    background:var(--white);border-radius:var(--radius-sm);
+    flex:1;min-height:0;display:flex;flex-direction:column;
+    box-shadow:0 1px 2px rgba(0,0,0,.04);
+    border:1px solid var(--neutral-300);
+    overflow:hidden;
+  }
+
+  /* ===== Action bar ===== */
+  .actionbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 16px 16px;flex-shrink:0;flex-wrap:wrap;gap:10px;
+  }
+  .left-action{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;height:32px;padding:6px 10px;
+    border-radius:var(--radius-xs);border:none;cursor:pointer;font-size:14px;
+    font-family:inherit;white-space:nowrap;
+  }
+  .btn-soft{background:var(--primary-50);color:var(--primary-500);}
+  .btn-soft:hover{filter:brightness(0.97);}
+  .btn-primary{background:var(--primary-500);color:#fff;}
+  .btn-primary:hover{background:#064840;}
+  .btn-outline{background:var(--white);border:1px solid var(--neutral-400);color:var(--neutral-800);}
+  .btn-outline:hover{background:var(--bg-100);}
+  .btn-grey{background:var(--neutral-300);color:var(--neutral-950);}
+  .count-pill{
+    background:var(--primary-500);color:#fff;border-radius:999px;width:16px;height:16px;
+    font-size:11px;display:flex;align-items:center;justify-content:center;
+  }
+  .search-box{
+    display:flex;align-items:center;gap:6px;width:300px;height:32px;padding:6px 10px;
+    border:1px solid var(--neutral-400);border-radius:var(--radius-xs);background:#fff;
+  }
+  .search-box input{border:none;outline:none;font-size:14px;font-family:inherit;flex:1;color:var(--neutral-950);}
+  .search-box input::placeholder{color:var(--neutral-600);}
+  .viewmode{
+    display:flex;align-items:center;gap:10px;height:32px;padding:6px 10px;border:1px solid var(--neutral-400);
+    border-radius:var(--radius-xs);background:#fff;cursor:pointer;
+  }
+  .viewmode .label{color:var(--neutral-700);font-size:14px;display:flex;align-items:center;gap:4px;}
+  .viewmode .value{font-size:14px;font-weight:400;}
+  .square-btn{
+    width:32px;height:32px;border-radius:var(--radius-xs);border:1px solid var(--neutral-400);
+    background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--neutral-800);
+  }
+  .square-btn:hover{background:var(--bg-100);}
+  .right-action{display:flex;align-items:center;gap:12px;}
+
+  /* ===== selection bar (only shown once at least 1 row is checked) ===== */
+  .selection-bar{
+    display:none;align-items:center;justify-content:space-between;
+    padding:6px 16px;font-size:14px;color:var(--neutral-800);flex-shrink:0;
+  }
+  .selection-bar.show{display:flex;}
+  .selection-bar b{font-weight:500;font-size:16px;color:var(--neutral-950);margin-left:6px;}
+  .selection-bar .btn{background:var(--neutral-300);}
+
+  /* ===== Table ===== */
+  .table-outer{flex:1;min-height:0;display:flex;flex-direction:column;padding:0 16px;overflow:hidden;}
+  .table-scroll{flex:1;overflow:auto;border:1px solid var(--neutral-300);border-radius:var(--radius-2xs);position:relative;}
+  table{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;table-layout:fixed;}
+  thead th{
+    position:sticky;top:0;z-index:5;background:var(--bg-100);
+    border-right:1px solid var(--neutral-300);border-bottom:1px solid var(--neutral-300);
+    font-size:14px;font-weight:500;text-align:left;padding:8px 16px;height:40px;
+    user-select:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  thead th .th-inner{display:flex;align-items:center;gap:4px;cursor:pointer;height:100%;}
+  thead th .th-inner span{overflow:hidden;text-overflow:ellipsis;}
+  thead th.col-select{text-align:center;}
+  thead th.col-select .th-inner{justify-content:center;cursor:default;}
+  thead th.sticky-left{position:sticky;z-index:7;}
+  thead th.sticky-right{position:sticky;right:0;z-index:7;text-align:center;}
+  .resize-handle{
+    position:absolute;top:0;right:0;width:6px;height:100%;cursor:col-resize;z-index:6;
+  }
+  .resize-handle:hover{background:var(--primary-500);opacity:.4;}
+  th{position:relative;}
+
+  /* pinned columns get a distinct tint so it's obvious which ones are pinned,
+     independent of each other — pinning a middle column doesn't pin its neighbors */
+  thead th.pinned-col{background:#dcebe8;}
+  tbody td.pinned-col{background:#eef5f4;}
+  tbody tr:hover td.pinned-col{background:#e4efec;}
+  tbody tr.row-selected td.pinned-col{background:var(--primary-50);}
+  .pinned-col{box-shadow:1px 0 4px -1px rgba(0,0,0,.14);}
+
+  tbody td{
+    border-right:1px solid var(--neutral-300);border-bottom:1px solid var(--neutral-300);
+    padding:8px 16px;font-size:14px;color:var(--neutral-950);background:#fff;
+    height:58px;vertical-align:middle;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  tbody td.col-select{text-align:center;padding:0;}
+  tbody td.sticky-left{position:sticky;z-index:2;background:#fff;}
+  tbody td.sticky-right{position:sticky;right:0;z-index:2;background:#fff;text-align:center;}
+  tbody tr:hover td{background:#fafbfb;}
+  tbody tr:hover td.sticky-left,tbody tr:hover td.sticky-right{background:#fafbfb;}
+  tbody tr.row-selected td{background:var(--primary-50);}
+  tbody tr.row-selected td.sticky-left,tbody tr.row-selected td.sticky-right{background:var(--primary-50);}
+
+  /* select column: number by default, checkbox appears on hover / when row selected (Lark-style) */
+  .select-wrap{position:relative;width:100%;height:100%;min-height:57px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;}
+  .select-wrap .idx-num{font-size:14px;color:var(--neutral-700);}
+  .select-wrap .idx-check{display:none;}
+  tr:hover .select-wrap .idx-num{display:none;}
+  tr:hover .select-wrap .idx-check{display:inline-block;}
+  tr.row-selected .select-wrap .idx-num{display:none;}
+  tr.row-selected .select-wrap .idx-check{display:inline-block;}
+
+  .cell-name{font-size:14px;color:var(--neutral-950);}
+  .cell-sub{font-size:13px;color:var(--neutral-800);margin-top:2px;}
+  .cell-stack{display:flex;flex-direction:column;justify-content:center;line-height:1.35;}
+
+  .badge{
+    display:inline-flex;align-items:center;justify-content:center;padding:4px 8px;
+    border-radius:var(--radius-xs);font-size:14px;border:1px solid transparent;white-space:nowrap;
+  }
+  .badge-warning{background:var(--warning-50);color:var(--warning-500);border-color:var(--warning-500);}
+  .badge-blue{background:var(--blue-50);color:var(--blue-600);}
+  .badge-success{background:var(--success-50);color:var(--success-500);}
+  .badge-error{background:var(--error-50);color:var(--error-500);}
+  .badge-grey{background:var(--bg-100);color:var(--neutral-800);}
+
+  input[type=checkbox]{width:16px;height:16px;accent-color:var(--primary-500);cursor:pointer;}
+
+  .kebab-btn{
+    width:28px;height:28px;border-radius:var(--radius-2xs);border:none;background:transparent;
+    display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--neutral-700);
+  }
+  .kebab-btn:hover{background:var(--bg-100);}
+
+  /* cell selection (drag range / column select) */
+  td.cell-selected{background:var(--select-blue) !important;box-shadow:inset 0 0 0 1px #8fb8ff;}
+  th.col-header-selected{background:var(--select-blue-strong) !important;}
+  td.col-body-selected{background:var(--select-blue) !important;}
+
+  /* stats bar */
+  .stats-bar{
+    position:absolute;bottom:10px;right:10px;background:#1f2430;color:#fff;font-size:13px;
+    padding:8px 14px;border-radius:8px;display:none;gap:16px;align-items:center;box-shadow:0 4px 14px rgba(0,0,0,.25);
+    z-index:20;
+  }
+  .stats-bar.show{display:flex;}
+  .stats-bar span b{margin-left:4px;color:#fff;}
+  .stats-bar span{color:#b7bec9;}
+  /* Temporarily disabled per request — remove this rule to bring the stats bar back */
+  .stats-bar{display:none !important;}
+
+  /* pagination */
+  .pagination{
+    display:flex;align-items:center;justify-content:flex-end;gap:10px;
+    padding:12px 16px;flex-shrink:0;font-size:14px;color:var(--neutral-800);
+  }
+  .page-btn{
+    width:28px;height:28px;border-radius:var(--radius-2xs);border:1px solid var(--neutral-400);background:#fff;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--neutral-800);
+  }
+  .page-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .page-btn:not(:disabled):hover{background:var(--bg-100);}
+  .page-num{
+    min-width:28px;height:28px;padding:0 8px;border-radius:var(--radius-2xs);border:1px solid var(--primary-500);
+    background:var(--primary-50);color:var(--primary-500);display:flex;align-items:center;justify-content:center;font-weight:500;
+  }
+  .rows-select{
+    height:28px;border:1px solid var(--neutral-400);border-radius:var(--radius-2xs);padding:0 8px;
+    font-family:inherit;font-size:14px;background:#fff;color:var(--neutral-950);cursor:pointer;
+  }
+
+  .col-menu-panel{
+    position:fixed;z-index:10000;min-width:210px;background:#fff;border:1px solid var(--neutral-300);
+    border-radius:var(--radius-sm);box-shadow:0 8px 24px rgba(0,0,0,.16);padding:6px;
+    font-family:'Inter',sans-serif;
+  }
+  .col-menu-item{
+    display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-2xs);
+    font-size:14px;color:var(--neutral-950);cursor:pointer;white-space:nowrap;
+  }
+  .col-menu-item:hover{background:var(--bg-100);}
+  .col-menu-item svg{flex-shrink:0;color:var(--neutral-700);}
+  .col-menu-divider{height:1px;background:var(--neutral-300);margin:6px 4px;}
+
+  .fs-panel{
+    position:fixed;z-index:10000;width:420px;max-width:calc(100vw - 16px);background:#fff;
+    border:1px solid var(--neutral-300);border-radius:var(--radius-sm);box-shadow:0 8px 24px rgba(0,0,0,.16);
+    padding:12px;font-family:'Inter',sans-serif;
+  }
+  .fs-empty{font-size:13px;color:var(--neutral-600);padding:6px 4px 10px;}
+  .fs-row{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+  .fs-row select, .fs-row input{
+    height:32px;border:1px solid var(--neutral-400);border-radius:var(--radius-2xs);
+    font-family:inherit;font-size:13px;color:var(--neutral-950);background:#fff;padding:0 8px;
+  }
+  .fs-field{flex:1.3;min-width:0;}
+  .fs-cond{flex:1;min-width:0;}
+  .fs-value{flex:1;min-width:0;}
+  .fs-remove{
+    flex-shrink:0;width:28px;height:28px;border:none;background:transparent;border-radius:var(--radius-2xs);
+    color:var(--neutral-600);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+  .fs-remove:hover{background:var(--bg-100);color:var(--error-500);}
+  .fs-add{
+    display:flex;align-items:center;gap:6px;font-size:13px;color:var(--primary-500);cursor:pointer;
+    padding:6px 4px;border-radius:var(--radius-2xs);width:fit-content;
+  }
+  .fs-add:hover{background:var(--primary-50);}
+  .fs-footer{display:flex;justify-content:flex-end;margin-top:8px;padding-top:8px;border-top:1px solid var(--neutral-300);}
+  .fs-clear{font-size:13px;color:var(--neutral-700);cursor:pointer;padding:6px 8px;border-radius:var(--radius-2xs);}
+  .fs-clear:hover{background:var(--bg-100);color:var(--error-500);}
+
+  .toast{
+    position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(12px);
+    background:#1f2430;color:#fff;padding:10px 18px;border-radius:8px;font-size:14px;
+    opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;z-index:9999;
+    box-shadow:0 6px 20px rgba(0,0,0,.25);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  ::-webkit-scrollbar{width:10px;height:10px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:#c7cccb;border-radius:999px;border:2px solid transparent;background-clip:content-box;}
+  ::-webkit-scrollbar-thumb:hover{background:#a9afad;background-clip:content-box;}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- ============ HEADER ============ -->
+  <header class="app-header">
+    <div class="left">
+      <button class="icon-btn" title="Apps">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 6h.01M12 6h.01M18 6h.01M6 12h.01M12 12h.01M18 12h.01M6 18h.01M12 18h.01M18 18h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+      </button>
+      <div class="logo-title">
+        <div class="logo-mark">K</div>
+        <span>Kế hoạch sản xuất</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn notif-dot" title="Thông báo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3a6 6 0 00-6 6v3.2c0 .5-.2 1-.5 1.4L4 15.5c-.7.9-.1 2.5 1.1 2.5h13.8c1.2 0 1.8-1.6 1.1-2.5l-1.5-2c-.3-.4-.5-.9-.5-1.4V9a6 6 0 00-6-6z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.5 20a2.5 2.5 0 005 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <div class="divider-v"></div>
+      <div class="user-chip">
+        <div class="avatar">SJ</div>
+        <div class="user-meta">
+          <span class="name">Sevago Jewelry</span>
+          <span class="role-tag">Quản lý</span>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="var(--neutral-700)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar" id="sidebar">
+      <div class="menu-list" id="menuList"></div>
+      <div class="sidebar-footer" id="collapseBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h10M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span>Ẩn điều hướng</span>
+      </div>
+    </aside>
+
+    <!-- ============ MAIN ============ -->
+    <main class="main-content">
+      <div class="breadcrumb">
+        <span>Sản xuất</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="var(--neutral-700)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <b>Quản lý nhu cầu sản xuất</b>
+      </div>
+
+      <div class="content-wrap">
+        <div class="page-title">Quản lý nhu cầu sản xuất</div>
+
+        <div class="card">
+          <!-- ACTION BAR -->
+          <div class="actionbar">
+            <div class="left-action">
+              <button class="btn btn-soft" id="btnFilter">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 5h16l-6 7v6l-4 2v-8L4 5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                Bộ lọc <span class="count-pill" id="filterCountPill" style="display:none;">0</span>
+              </button>
+              <button class="btn btn-soft" id="btnSort">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 4v16M6 4l-3 3M6 4l3 3M18 20V4M18 20l-3-3M18 20l3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Sắp xếp <span class="count-pill" id="sortCountPill" style="display:none;">0</span>
+              </button>
+              <div class="search-box">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="var(--neutral-600)" stroke-width="1.6"/><path d="M21 21l-4-4" stroke="var(--neutral-600)" stroke-width="1.6" stroke-linecap="round"/></svg>
+                <input type="text" id="searchInput" placeholder="Tìm kiếm tên biến, tên hiển thị,..">
+              </div>
+              <div class="viewmode">
+                <span class="label">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="4" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="10" width="18" height="4" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="16" width="18" height="4" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+                  Chế độ xem:
+                </span>
+                <span class="value">Tất cả</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="var(--neutral-800)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+            <div class="right-action">
+              <button class="btn btn-primary" id="btnCreateOrder">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+                Tạo Order
+              </button>
+              <button class="square-btn" id="btnFields" title="Hiện lại cột đã ẩn / bỏ ghim">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 8h10M17 8h3M4 16h3M10 16h10M14 5v6M7 13v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              </button>
+              <button class="square-btn" id="btnRefresh" title="Tải lại">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0114-5.3M20 12a8 8 0 01-14 5.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M18 4v4h-4M6 20v-4h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- SELECTION BAR -->
+          <div class="selection-bar" id="selectionBar">
+            <div>Đã chọn <b id="selCount">0 Mã Order</b></div>
+            <button class="btn" id="btnPlannedOrder">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              Tạo Planned Order
+            </button>
+          </div>
+
+          <!-- TABLE -->
+          <div class="table-outer">
+            <div class="table-scroll" id="tableScroll">
+              <table id="dataTable">
+                <colgroup id="colgroup"></colgroup>
+                <thead>
+                  <tr id="headRow"></tr>
+                </thead>
+                <tbody id="bodyRows"></tbody>
+              </table>
+              <div class="stats-bar" id="statsBar">
+                <span>Đã chọn <b id="statSelected">0</b></span>
+                <span>Số lượng <b id="statCount">0</b></span>
+                <span>Tổng <b id="statSum">0</b></span>
+                <span>Trung bình <b id="statAvg">0</b></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- PAGINATION -->
+          <div class="pagination">
+            <span id="pageInfo">1–15 / 15</span>
+            <select class="rows-select" id="rowsPerPage">
+              <option value="10">10 / trang</option>
+              <option value="20" selected>20 / trang</option>
+              <option value="50">50 / trang</option>
+            </select>
+            <button class="page-btn" id="prevPage">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="page-num" id="pageNum">1</div>
+            <button class="page-btn" id="nextPage">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   SIDEBAR MENU
+========================================================= */
+const menuItems = [
+  {icon:'home', label:'Trang chủ'},
+  {icon:'box', label:'Danh sách đơn hàng', sub:true},
+  {icon:'clip', label:'Planned Orders', sub:true},
+  {icon:'shirt', label:'Manufacturing Order', sub:true},
+  {icon:'coin', label:'Lệnh cấp vàng', sub:true},
+  {icon:'doc', label:'Danh sách MPS', sub:true},
+  {icon:'inbox', label:'Danh sách yêu cầu', sub:true, active:true},
+  {icon:'chart', label:'Báo cáo', sub:true},
+  {icon:'gear', label:'Cấu hình', sub:true},
+];
+const icons = {
+  home:'<path d="M4 11l8-7 8 7M6 10v9h12v-9" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>',
+  box:'<path d="M3 8l9-4 9 4-9 4-9-4zM3 8v8l9 4 9-4V8M12 12v8" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>',
+  clip:'<rect x="5" y="4" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M9 4V3h6v1" stroke="currentColor" stroke-width="1.5"/><path d="M9 11h6M9 15h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
+  shirt:'<path d="M8 4L4 7l2 3 2-1v11h8V9l2 1 2-3-4-3-2 2h-4L8 4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>',
+  coin:'<circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v8M9.5 10a2.5 2 0 012.5-1.3c1.4 0 2.5.7 2.5 1.8s-1.1 1.5-2.5 1.8c-1.6.3-2.5.8-2.5 1.9S10.6 16 12 16c1.2 0 2.2-.5 2.5-1.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>',
+  doc:'<path d="M7 3h7l4 4v14H7V3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 12h6M9 16h6M9 8h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
+  inbox:'<path d="M4 12h4l1.5 3h5L16 12h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M4 12l1.5-6h13L20 12v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>',
+  chart:'<path d="M4 20V10M12 20V4M20 20v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+  gear:'<circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M19 12a7 7 0 00-.2-1.6l2-1.5-2-3.4-2.3.9a7 7 0 00-2.7-1.6L13.3 2h-2.6l-.5 2.8a7 7 0 00-2.7 1.6l-2.3-.9-2 3.4 2 1.5A7 7 0 005 12c0 .5 0 1.1.2 1.6l-2 1.5 2 3.4 2.3-.9c.8.7 1.7 1.3 2.7 1.6l.5 2.8h2.6l.5-2.8c1-.3 1.9-.9 2.7-1.6l2.3.9 2-3.4-2-1.5c.2-.5.2-1.1.2-1.6z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>',
+};
+const menuListEl = document.getElementById('menuList');
+menuListEl.innerHTML = menuItems.map(m => `
+  <div class="menu-item ${m.active?'active':''}">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">${icons[m.icon]}</svg>
+    <span>${m.label}</span>
+    ${m.sub?'<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
+  </div>
+`).join('');
+
+document.getElementById('collapseBtn').addEventListener('click', () => {
+  const sb = document.getElementById('sidebar');
+  const collapsed = sb.style.width === '64px';
+  sb.style.width = collapsed ? '250px' : '64px';
+  menuListEl.querySelectorAll('span, svg.chev').forEach(el => el.style.display = collapsed ? '' : 'none');
+});
+
+/* =========================================================
+   TABLE DATA
+========================================================= */
+const columns = [
+  {key:'select', label:'', width:56, sticky:'left-1'},
+  {key:'maOrder', label:'Mã Order', width:130},
+  {key:'orderType', label:'Order Type', width:130},
+  {key:'maKH', label:'Mã khách hàng', width:130},
+  {key:'tenKH', label:'Tên khách hàng', width:190},
+  {key:'khuVuc', label:'Khu vực GH', width:110},
+  {key:'tuoiVang', label:'Tuổi vàng', width:110, numeric:true},
+  {key:'maItem', label:'Mã item - Số lượng', width:210},
+  {key:'tenItem', label:'Tên item', width:170},
+  {key:'tongSL', label:'Tổng SL sản phẩm (pcs)', width:150, numeric:true},
+  {key:'ngayGH', label:'Ngày giao hàng yêu cầu', width:170},
+  {key:'ghiChu', label:'Ghi chú', width:200},
+  {key:'ttOrder', label:'Trạng thái Order', width:150},
+  {key:'ttKeHoach', label:'Trạng thái kế hoạch', width:160},
+  {key:'ttSanXuat', label:'Trạng thái sản xuất', width:160},
+  {key:'nguoiTao', label:'Người tạo', width:140},
+  {key:'actions', label:'', width:56, sticky:'right'},
+];
+
+const customers = [
+  {code:'KH-01234', name:'Jewelry Co. Ltd', region:'Miền Bắc'},
+  {code:'KH-01235', name:'Golden Star Co.', region:'Miền Nam'},
+  {code:'KH-01236', name:'Diamond House', region:'Miền Trung'},
+  {code:'KH-01237', name:'Luxury Gems Ltd', region:'Miền Bắc'},
+  {code:'KH-01238', name:'Bright Jewelry', region:'Miền Nam'},
+];
+const items = [
+  {code:'SP-AU-0012', name:'Nhẫn kim cương'},
+  {code:'SP-AU-0045', name:'Dây chuyền vàng'},
+  {code:'SP-AU-0078', name:'Vòng tay bạc'},
+  {code:'SP-AU-0091', name:'Hoa tai ngọc trai'},
+  {code:'SP-AU-0102', name:'Lắc tay vàng 18K'},
+];
+const gioldAge = ['18K','14K','24K','10K'];
+const zones = ['TP.HCM','Hà Nội','Đà Nẵng','Cần Thơ','Hải Phòng'];
+const creators = ['Nguyễn Văn A','Trần Thị B','Lê Văn C','Phạm Thị D'];
+const ttOrderOpts = [{v:'Mới',c:'grey'},{v:'Đang xử lý',c:'blue'},{v:'Hoàn thành',c:'success'},{v:'Đã huỷ',c:'error'}];
+const ttPlanOpts = [{v:'Chưa lập KH',c:'grey'},{v:'Đã lập KH',c:'blue'},{v:'Đang điều chỉnh',c:'warning'}];
+const ttProdOpts = [{v:'Chưa SX',c:'grey'},{v:'Đang SX',c:'blue'},{v:'Hoàn tất SX',c:'success'}];
+
+function pick(arr, i){ return arr[i % arr.length]; }
+
+const rows = [];
+for(let i=0;i<28;i++){
+  const cust = pick(customers, i);
+  const item = pick(items, i);
+  const orderNo = 'SO-' + String(Math.floor(i/2)+1).padStart(5,'0');
+  rows.push({
+    id: i+1,
+    maOrder: orderNo,
+    orderType: i%5===0 ? 'Group Purchase Order' : 'Sales Order',
+    maKH: cust.code,
+    tenKH: cust.name,
+    region: cust.region,
+    khuVuc: pick(zones, i+1),
+    tuoiVang: pick(gioldAge, i),
+    maItemCode: item.code,
+    maItemQty: (i%6)+2,
+    tenItem: item.name,
+    tongSL: (i%6)+2 + (i%3)*4,
+    ngayGH: `${String((i%28)+1).padStart(2,'0')}-0${(i%9)+1}-2026  ${String(8+(i%9)).padStart(2,'0')}:00`,
+    ghiChu: i%4===0 ? 'Giao trước 10h sáng' : (i%3===0 ? 'Không có ghi chú' : '-'),
+    ttOrder: pick(ttOrderOpts, i),
+    ttKeHoach: pick(ttPlanOpts, i+1),
+    ttSanXuat: pick(ttProdOpts, i+2),
+    nguoiTao: pick(creators, i),
+  });
+}
+
+/* =========================================================
+   STATE
+========================================================= */
+let selectedRowIds = new Set([1]); // row 1 pre-selected like the reference screenshot
+let selectedCells = new Set(); // "r-c"
+let selectedColIndex = null;
+let rowsPerPage = 20;
+let currentPage = 1;
+// Independently pinned columns (by original column index). Column 0 (the
+// select/checkbox column) is always pinned. Pinning a middle column pins
+// ONLY that column — its neighbors keep scrolling normally on both sides.
+let pinnedCols = new Set([0]);
+
+/* =========================================================
+   RENDER: colgroup + header
+========================================================= */
+const colgroupEl = document.getElementById('colgroup');
+const headRowEl = document.getElementById('headRow');
+
+// A pinned column's sticky "left" offset is the combined width of every
+// OTHER pinned, visible column that sits before it — not all columns before
+// it — so non-contiguous pins each stay put independently while everything
+// unpinned scrolls underneath them.
+function stickyLeftOffset(idx){
+  let left = 0;
+  for(let i=0;i<idx;i++){
+    if(pinnedCols.has(i) && !columns[i].hidden) left += columns[i].width;
+  }
+  return left;
+}
+
+function visibleColumns(){
+  return columns.map((c,i)=>({c,i})).filter(x=>!x.c.hidden);
+}
+
+function renderHeader(){
+  colgroupEl.innerHTML = visibleColumns().map(({c,i})=>`<col id="col-${i}" style="width:${c.width}px">`).join('');
+
+  headRowEl.innerHTML = visibleColumns().map(({c,i})=>{
+    let cls = '';
+    let style='';
+    if(pinnedCols.has(i)){
+      cls += ' sticky-left';
+      style = `left:${stickyLeftOffset(i)}px`;
+      if(c.key!=='select') cls += ' pinned-col';
+    }
+    if(c.sticky==='right'){cls += ' sticky-right';}
+    if(c.key==='select') cls += ' col-select';
+
+    let inner = '';
+    if(c.key==='select'){
+      inner = `<input type="checkbox" id="selectAll" title="Chọn tất cả">`;
+    } else if(c.key==='actions'){
+      inner = '';
+    } else {
+      inner = `<span>${c.label}</span>`;
+    }
+    const resize = (c.key!=='select' && c.key!=='actions') ? `<div class="resize-handle" data-col="${i}"></div>` : '';
+    return `<th class="${cls}" style="width:${c.width}px;${style}" data-col="${i}">
+        <div class="th-inner" data-colselect="${i}">${inner}</div>
+        ${resize}
+      </th>`;
+  }).join('');
+
+  attachColumnMenuEvents();
+  attachColumnSelectEvents();
+}
+
+/* =========================================================
+   RENDER: body rows
+========================================================= */
+const bodyEl = document.getElementById('bodyRows');
+
+function badgeHtml(obj){
+  return `<span class="badge badge-${obj.c}">${obj.v}</span>`;
+}
+
+// Builds the per-column cell HTML for a given row object. globalIdx/isSel are
+// only used for the select/checkbox cell (position number + checked state).
+function buildCellsData(r, globalIdx, isSel){
+  return [
+    `<div class="select-wrap">
+       <span class="idx-num">${globalIdx+1}</span>
+       <input type="checkbox" class="row-check idx-check" data-id="${r.id}" ${isSel?'checked':''}>
+     </div>`,
+    `<span class="cell-name">${r.maOrder}</span>`,
+    `<span class="cell-name">${r.orderType}</span>`,
+    `<span class="cell-name">${r.maKH}</span>`,
+    `<div class="cell-stack"><span class="cell-name">${r.tenKH}</span><span class="cell-sub">${r.region}</span></div>`,
+    `<span class="cell-name">${r.khuVuc}</span>`,
+    `${badgeHtml({v:r.tuoiVang,c:'warning'})}`,
+    `<span class="cell-name">${r.maItemCode} [${r.maItemQty}],</span>`,
+    `<span class="cell-name">${r.tenItem}</span>`,
+    `<span class="cell-name">${r.tongSL}</span>`,
+    `<span class="cell-name">${r.ngayGH}</span>`,
+    `<span class="cell-name">${r.ghiChu}</span>`,
+    `${badgeHtml(r.ttOrder)}`,
+    `${badgeHtml(r.ttKeHoach)}`,
+    `${badgeHtml(r.ttSanXuat)}`,
+    `<span class="cell-name">${r.nguoiTao}</span>`,
+    `<button class="kebab-btn" title="Tuỳ chọn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="19" r="1.6" fill="currentColor"/></svg></button>`,
+  ];
+}
+
+// Column-only sort: sorting a column reorders ONLY that column's displayed
+// values top-to-bottom. Every other column keeps showing its original row's
+// data at that position — the columns are intentionally decoupled per request.
+let columnOverrides = {}; // colKey -> array of row objects, aligned by absolute row position
+
+function renderRows(){
+  const displayRows = getDisplayRows();
+  const start = (currentPage-1)*rowsPerPage;
+  const pageRows = displayRows.slice(start, start+rowsPerPage);
+
+  bodyEl.innerHTML = pageRows.map((r, localIdx) => {
+    const globalIdx = start + localIdx;
+    const isSel = selectedRowIds.has(r.id);
+    const cellsData = buildCellsData(r, globalIdx, isSel);
+
+    const tds = visibleColumns().map(({c,i:ci})=>{
+      let cls = [];
+      let style = '';
+      if(pinnedCols.has(ci)){
+        cls.push('sticky-left');
+        style = `left:${stickyLeftOffset(ci)}px`;
+        if(c.key!=='select') cls.push('pinned-col');
+      }
+      if(c.sticky==='right'){cls.push('sticky-right');}
+      if(c.key==='select') cls.push('col-select');
+
+      let cellHtml = cellsData[ci];
+      if(c.key!=='select' && c.key!=='actions' && columnOverrides[c.key]){
+        const overrideRow = columnOverrides[c.key][globalIdx];
+        if(overrideRow) cellHtml = buildCellsData(overrideRow, globalIdx, selectedRowIds.has(overrideRow.id))[ci];
+      }
+
+      return `<td class="${cls.join(' ')}" style="width:${c.width}px;${style}" data-row="${r.id}" data-col="${ci}">${cellHtml}</td>`;
+    }).join('');
+
+    return `<tr data-row="${r.id}" class="${isSel?'row-selected':''}">${tds}</tr>`;
+  }).join('');
+
+  attachRowCheckboxEvents();
+  attachRowSelectDrag();
+  attachCellSelectionEvents();
+  updatePaginationUI(start, pageRows.length, displayRows.length);
+  applyCellHighlight();
+}
+
+/* =========================================================
+   SELECTION: rows / checkboxes
+========================================================= */
+function updateSelectionBar(){
+  document.getElementById('selCount').textContent = `${selectedRowIds.size} Mã Order`;
+  document.getElementById('selectionBar').classList.toggle('show', selectedRowIds.size>0);
+  const selectAllEl = document.getElementById('selectAll');
+  const total = rows.length;
+  selectAllEl.checked = selectedRowIds.size === total && total>0;
+  selectAllEl.indeterminate = selectedRowIds.size>0 && selectedRowIds.size<total;
+}
+
+function attachRowCheckboxEvents(){
+  document.querySelectorAll('.row-check').forEach(cb=>{
+    cb.addEventListener('change', (e)=>{
+      const id = parseInt(e.target.dataset.id);
+      if(e.target.checked) selectedRowIds.add(id); else selectedRowIds.delete(id);
+      const tr = e.target.closest('tr');
+      tr.classList.toggle('row-selected', e.target.checked);
+      updateSelectionBar();
+    });
+  });
+}
+
+/* =========================================================
+   SELECTION: drag across the checkbox/# column to bulk-select
+   multiple rows at once (Excel/Lark row-header drag), plus
+   Shift+Click to select a contiguous range from the last click.
+========================================================= */
+let rowDragging = false;
+let rowDragTargetState = true;
+let lastClickedRowIdx = null;
+
+function setRowChecked(rIdx, checked){
+  const id = currentPageRowOrder[rIdx];
+  if(id===undefined) return;
+  const tr = bodyEl.querySelector(`tr[data-row="${id}"]`);
+  if(!tr) return;
+  const cb = tr.querySelector('.row-check');
+  if(cb) cb.checked = checked;
+  tr.classList.toggle('row-selected', checked);
+  if(checked) selectedRowIds.add(id); else selectedRowIds.delete(id);
+}
+
+/* Mutual exclusivity: selecting a cell range / column clears row-checkbox
+   selection, and selecting rows clears any active cell/column selection —
+   so only one kind of selection is ever visible at a time. */
+function clearRowSelection(){
+  if(selectedRowIds.size===0) return;
+  selectedRowIds.clear();
+  bodyEl.querySelectorAll('tr').forEach(tr=>{
+    tr.classList.remove('row-selected');
+    const cb = tr.querySelector('.row-check');
+    if(cb) cb.checked = false;
+  });
+  updateSelectionBar();
+}
+function clearCellColumnSelection(){
+  selectedCells.clear();
+  selectedColIndex = null;
+  applyCellHighlight();
+}
+
+function attachRowSelectDrag(){
+  bodyEl.querySelectorAll('td.col-select').forEach(td=>{
+    td.addEventListener('mousedown', (e)=>{
+      const tr = td.closest('tr');
+      const rIdx = currentPageRowOrder.indexOf(parseInt(tr.dataset.row));
+      if(rIdx===-1) return;
+      clearCellColumnSelection();
+      if(e.shiftKey && lastClickedRowIdx!==null){
+        e.preventDefault();
+        const a = Math.min(lastClickedRowIdx, rIdx), b = Math.max(lastClickedRowIdx, rIdx);
+        for(let i=a;i<=b;i++) setRowChecked(i, true);
+        updateSelectionBar();
+        return;
+      }
+      lastClickedRowIdx = rIdx;
+      const cb = td.querySelector('.row-check');
+      rowDragTargetState = cb ? !cb.checked : true; // dragging extends this click's resulting state
+      rowDragging = true;
+      lastClientX = e.clientX; lastClientY = e.clientY;
+      startEdgeScrollLoop();
+      // no preventDefault: let the native checkbox toggle normally for a plain click
+    });
+  });
+}
+
+document.addEventListener('mousemove', (e)=>{
+  if(!rowDragging) return;
+  lastClientX = e.clientX; lastClientY = e.clientY;
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const td = el ? el.closest('td.col-select') : null;
+  if(!td || !bodyEl.contains(td)) return;
+  const tr = td.closest('tr');
+  const rIdx = currentPageRowOrder.indexOf(parseInt(tr.dataset.row));
+  if(rIdx===-1) return;
+  setRowChecked(rIdx, rowDragTargetState);
+  updateSelectionBar();
+});
+document.addEventListener('mouseup', ()=>{
+  if(rowDragging){ rowDragging=false; updateSelectionBar(); }
+});
+
+function attachSelectAllEvent(){
+  const el = document.getElementById('selectAll');
+  if(!el) return;
+  el.addEventListener('change', (e)=>{
+    if(e.target.checked){ rows.forEach(r=>selectedRowIds.add(r.id)); }
+    else { selectedRowIds.clear(); }
+    renderRows();
+    updateSelectionBar();
+  });
+}
+
+/* =========================================================
+   SELECTION: column header click -> select whole column
+========================================================= */
+function attachColumnSelectEvents(){
+  headRowEl.querySelectorAll('[data-colselect]').forEach(el=>{
+    el.addEventListener('click', (e)=>{
+      if(e.target.closest('#selectAll') || e.target.closest('.col-menu-btn')) return;
+      const ci = parseInt(el.dataset.colselect);
+      const col = columns[ci];
+      if(col.key==='select' || col.key==='actions') return;
+      clearRowSelection();
+      closeColumnMenu();
+      selectedColIndex = (selectedColIndex===ci) ? null : ci;
+      selectedCells.clear();
+      applyCellHighlight();
+    });
+  });
+  attachSelectAllEvent();
+}
+
+/* =========================================================
+   COLUMN HEADER DROPDOWN: sort, freeze, hide
+========================================================= */
+const columnAccessors = {
+  maOrder: r=>r.maOrder,
+  orderType: r=>r.orderType,
+  maKH: r=>r.maKH,
+  tenKH: r=>r.tenKH,
+  khuVuc: r=>r.khuVuc,
+  tuoiVang: r=>parseInt(r.tuoiVang)||0,
+  maItem: r=>r.maItemCode,
+  tenItem: r=>r.tenItem,
+  tongSL: r=>r.tongSL,
+  ngayGH: r=>parseVNDate(r.ngayGH),
+  ghiChu: r=>r.ghiChu,
+  ttOrder: r=>r.ttOrder.v,
+  ttKeHoach: r=>r.ttKeHoach.v,
+  ttSanXuat: r=>r.ttSanXuat.v,
+  nguoiTao: r=>r.nguoiTao,
+};
+
+function parseVNDate(s){
+  const m = /(\d{2})-(\d{2})-(\d{4})\s+(\d{2}):(\d{2})/.exec(s||'');
+  if(!m) return 0;
+  return new Date(+m[3], +m[2]-1, +m[1], +m[4], +m[5]).getTime();
+}
+
+/* =========================================================
+   TABLE-WIDE FILTER + SORT (the "Bộ lọc" / "Sắp xếp" action-bar
+   buttons). Filtering hides non-matching rows; sorting here
+   reorders the whole row (unlike the per-column-only sort in the
+   header right-click menu).
+========================================================= */
+const filterableFields = ['maOrder','orderType','maKH','tenKH','khuVuc','tuoiVang','maItem','tenItem','tongSL','ngayGH','ghiChu','ttOrder','ttKeHoach','ttSanXuat','nguoiTao'];
+const fieldKind = {
+  maOrder:'text', orderType:'select', maKH:'text', tenKH:'text', khuVuc:'select',
+  tuoiVang:'select', maItem:'text', tenItem:'text', tongSL:'number', ngayGH:'date',
+  ghiChu:'text', ttOrder:'select', ttKeHoach:'select', ttSanXuat:'select', nguoiTao:'select',
+};
+function fieldLabel(key){
+  const col = columns.find(c=>c.key===key);
+  return col ? col.label : key;
+}
+function fieldOptions(key){
+  const accessor = columnAccessors[key];
+  const raw = key==='tuoiVang' ? rows.map(r=>r.tuoiVang) : rows.map(accessor);
+  return [...new Set(raw)].sort();
+}
+
+const conditionsByKind = {
+  text:   [{v:'contains',l:'Chứa'},{v:'not_contains',l:'Không chứa'},{v:'is',l:'Là'},{v:'empty',l:'Trống'},{v:'not_empty',l:'Không trống'}],
+  select: [{v:'is',l:'Là'},{v:'is_not',l:'Khác'}],
+  number: [{v:'eq',l:'='},{v:'gt',l:'>'},{v:'lt',l:'<'},{v:'gte',l:'≥'},{v:'lte',l:'≤'}],
+  date:   [{v:'on',l:'Vào ngày'},{v:'before',l:'Trước ngày'},{v:'after',l:'Sau ngày'}],
+};
+
+let activeFilters = []; // {field, condition, value}
+let activeSorts = [];   // {field, dir:'asc'|'desc'}
+
+function matchesFilter(row, f){
+  const kind = fieldKind[f.field];
+  const accessor = columnAccessors[f.field];
+  if(!accessor) return true;
+  if(kind==='text' || kind==='select'){
+    const raw = f.field==='tuoiVang' ? row.tuoiVang : accessor(row);
+    const sv = String(raw).toLowerCase();
+    const fv = String(f.value||'').toLowerCase();
+    switch(f.condition){
+      case 'contains': return sv.includes(fv);
+      case 'not_contains': return fv==='' ? true : !sv.includes(fv);
+      case 'is': return fv==='' ? true : sv===fv;
+      case 'is_not': return fv==='' ? true : sv!==fv;
+      case 'empty': return sv==='';
+      case 'not_empty': return sv!=='';
+      default: return true;
+    }
+  }
+  if(kind==='number'){
+    if(f.value===''||f.value===undefined) return true;
+    const v = accessor(row), n = parseFloat(f.value);
+    if(isNaN(n)) return true;
+    switch(f.condition){
+      case 'eq': return v===n;
+      case 'gt': return v>n;
+      case 'lt': return v<n;
+      case 'gte': return v>=n;
+      case 'lte': return v<=n;
+      default: return true;
+    }
+  }
+  if(kind==='date'){
+    if(!f.value) return true;
+    const v = accessor(row); // timestamp
+    const target = new Date(f.value+'T00:00:00').getTime();
+    const dayMs = 86400000;
+    switch(f.condition){
+      case 'on': return v>=target && v<target+dayMs;
+      case 'before': return v<target;
+      case 'after': return v>=target+dayMs;
+      default: return true;
+    }
+  }
+  return true;
+}
+
+function getDisplayRows(){
+  let result = rows;
+  if(activeFilters.length){
+    result = result.filter(r=>activeFilters.every(f=>matchesFilter(r,f)));
+  }
+  if(activeSorts.length){
+    result = [...result].sort((a,b)=>{
+      for(const s of activeSorts){
+        const accessor = columnAccessors[s.field];
+        if(!accessor) continue;
+        let va = accessor(a), vb = accessor(b);
+        if(typeof va==='string') va = va.toLowerCase();
+        if(typeof vb==='string') vb = vb.toLowerCase();
+        if(va<vb) return s.dir==='asc' ? -1 : 1;
+        if(va>vb) return s.dir==='asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  }
+  return result;
+}
+
+function updateFilterSortBadges(){
+  const fp = document.getElementById('filterCountPill');
+  fp.textContent = activeFilters.length;
+  fp.style.display = activeFilters.length ? '' : 'none';
+  const sp = document.getElementById('sortCountPill');
+  sp.textContent = activeSorts.length;
+  sp.style.display = activeSorts.length ? '' : 'none';
+}
+
+function sortRowsByColumn(colIndex, asc){
+  const col = columns[colIndex];
+  const accessor = columnAccessors[col.key];
+  if(!accessor) return;
+  // Only this column's displayed values get reordered — every other column
+  // keeps showing the data of the row that's actually at that position.
+  const sortedRows = [...getDisplayRows()].sort((a,b)=>{
+    let va = accessor(a), vb = accessor(b);
+    if(typeof va==='string') va = va.toLowerCase();
+    if(typeof vb==='string') vb = vb.toLowerCase();
+    if(va<vb) return asc?-1:1;
+    if(va>vb) return asc?1:-1;
+    return 0;
+  });
+  columnOverrides[col.key] = sortedRows;
+  currentPage = 1;
+  clearRowSelection();
+  clearCellColumnSelection();
+  renderRows();
+}
+
+let openMenuEl = null;
+function closeColumnMenu(){
+  if(openMenuEl){ openMenuEl.remove(); openMenuEl = null; }
+}
+
+function togglePin(colIndex){
+  if(pinnedCols.has(colIndex)) pinnedCols.delete(colIndex);
+  else pinnedCols.add(colIndex);
+  renderHeader();
+  renderRows();
+}
+
+function openColumnMenu(colIndex, x, y){
+  closeColumnMenu();
+  const col = columns[colIndex];
+  const isDate = col.key==='ngayGH';
+  const isNumeric = !!col.numeric;
+  const ascLabel = isDate ? 'Cũ → Mới' : (isNumeric ? 'Thấp → Cao' : 'A → Z');
+  const descLabel = isDate ? 'Mới → Cũ' : (isNumeric ? 'Cao → Thấp' : 'Z → A');
+  const isPinned = pinnedCols.has(colIndex);
+  const sortIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 4v16M6 4l-3 3M6 4l3 3M18 20V4M18 20l-3-3M18 20l3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const pinIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M4 8l8-4 8 4M4 16l8 4 8-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const unpinIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 3l18 18M12 2v6M4 8l3.2 1.6M20 8l-4 2M4 16l8 4 8-4M8.5 13L4 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const hideIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.9 5.1A10.4 10.4 0 0112 5c5 0 9 4 10 7-.4 1.1-1.2 2.4-2.3 3.6M6.5 6.6C4.6 7.9 3.1 9.8 2 12c1 3 5 7 10 7 1.3 0 2.6-.3 3.7-.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const clearSortIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 6h13M3 12h9M3 18h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M18 15l3 3m0-3l-3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  const hasOwnSort = !!columnOverrides[col.key];
+
+  const menu = document.createElement('div');
+  menu.className = 'col-menu-panel';
+  menu.innerHTML = `
+    <div class="col-menu-item" data-action="sort-asc">${sortIcon}<span>Sắp xếp ${ascLabel}</span></div>
+    <div class="col-menu-item" data-action="sort-desc">${sortIcon}<span>Sắp xếp ${descLabel}</span></div>
+    ${hasOwnSort?`<div class="col-menu-item" data-action="clear-sort">${clearSortIcon}<span>Bỏ sắp xếp riêng cột này</span></div>`:''}
+    <div class="col-menu-divider"></div>
+    <div class="col-menu-item" data-action="toggle-pin">${isPinned?unpinIcon:pinIcon}<span>${isPinned?'Bỏ ghim cột này':'Ghim cột này'}</span></div>
+    <div class="col-menu-item" data-action="hide">${hideIcon}<span>Ẩn cột</span></div>
+  `;
+  document.body.appendChild(menu);
+
+  const menuRect = menu.getBoundingClientRect();
+  let left = x;
+  if(left + menuRect.width > window.innerWidth - 8) left = window.innerWidth - menuRect.width - 8;
+  let top = y;
+  if(top + menuRect.height > window.innerHeight - 8) top = window.innerHeight - menuRect.height - 8;
+  menu.style.left = Math.max(8,left) + 'px';
+  menu.style.top = Math.max(8,top) + 'px';
+
+  menu.querySelectorAll('[data-action]').forEach(item=>{
+    item.addEventListener('click', ()=>{
+      const action = item.dataset.action;
+      if(action==='sort-asc') sortRowsByColumn(colIndex, true);
+      else if(action==='sort-desc') sortRowsByColumn(colIndex, false);
+      else if(action==='clear-sort'){ delete columnOverrides[columns[colIndex].key]; renderRows(); }
+      else if(action==='toggle-pin') togglePin(colIndex);
+      else if(action==='hide'){ columns[colIndex].hidden = true; renderHeader(); renderRows(); }
+      closeColumnMenu();
+    });
+  });
+
+  openMenuEl = menu;
+}
+
+// Right-click on a header cell opens the column menu (sort / pin / hide),
+// instead of the browser's native context menu.
+function attachColumnMenuEvents(){
+  headRowEl.querySelectorAll('th[data-col]').forEach(th=>{
+    const ci = parseInt(th.dataset.col);
+    const col = columns[ci];
+    if(!col || col.key==='select' || col.key==='actions') return;
+    th.addEventListener('contextmenu', (e)=>{
+      e.preventDefault();
+      openColumnMenu(ci, e.clientX, e.clientY);
+    });
+  });
+}
+
+/* =========================================================
+   SELECTION: drag range over cells ("bôi đen")
+========================================================= */
+let dragging = false;
+let anchor = null; // {row index in current page, col}
+let currentPageRowOrder = [];
+
+/* =========================================================
+   AUTO-SCROLL WHEN DRAGGING NEAR THE TABLE EDGE
+   While dragging a cell range or a row-header selection, moving
+   the cursor near the left/right (or top/bottom) edge of the
+   scroll container keeps auto-scrolling in that direction, like
+   Excel/Lark, and keeps extending the selection as it scrolls.
+========================================================= */
+let lastClientX = 0, lastClientY = 0, edgeScrollRAF = null;
+const EDGE_ZONE = 50, EDGE_MAX_SPEED = 24;
+
+function edgeScrollStep(){
+  if(!dragging && !rowDragging){ edgeScrollRAF = null; return; }
+  const scrollEl = document.getElementById('tableScroll');
+  const rect = scrollEl.getBoundingClientRect();
+  let dx = 0, dy = 0;
+
+  if(lastClientX < rect.left + EDGE_ZONE){
+    dx = -Math.ceil(EDGE_MAX_SPEED * Math.min(1, (rect.left + EDGE_ZONE - lastClientX) / EDGE_ZONE));
+  } else if(lastClientX > rect.right - EDGE_ZONE){
+    dx = Math.ceil(EDGE_MAX_SPEED * Math.min(1, (lastClientX - (rect.right - EDGE_ZONE)) / EDGE_ZONE));
+  }
+  if(lastClientY < rect.top + EDGE_ZONE){
+    dy = -Math.ceil(EDGE_MAX_SPEED * Math.min(1, (rect.top + EDGE_ZONE - lastClientY) / EDGE_ZONE));
+  } else if(lastClientY > rect.bottom - EDGE_ZONE){
+    dy = Math.ceil(EDGE_MAX_SPEED * Math.min(1, (lastClientY - (rect.bottom - EDGE_ZONE)) / EDGE_ZONE));
+  }
+
+  if(dx!==0 || dy!==0){
+    scrollEl.scrollLeft += dx;
+    scrollEl.scrollTop += dy;
+    // re-evaluate what's under the cursor after the scroll so the selection keeps growing
+    const el = document.elementFromPoint(lastClientX, lastClientY);
+    const td = el ? el.closest('td') : null;
+    if(td && bodyEl.contains(td)){
+      const col = parseInt(td.dataset.col);
+      const rIdx = currentPageRowOrder.indexOf(parseInt(td.dataset.row));
+      if(dragging && anchor && rIdx!==-1 && columns[col].key!=='select' && columns[col].key!=='actions'){
+        selectRange(anchor.r, anchor.c, rIdx, col);
+      } else if(rowDragging && rIdx!==-1 && td.classList.contains('col-select')){
+        setRowChecked(rIdx, rowDragTargetState);
+        updateSelectionBar();
+      }
+    }
+  }
+  edgeScrollRAF = requestAnimationFrame(edgeScrollStep);
+}
+function startEdgeScrollLoop(){
+  if(edgeScrollRAF===null) edgeScrollRAF = requestAnimationFrame(edgeScrollStep);
+}
+
+function attachCellSelectionEvents(){
+  currentPageRowOrder = Array.from(bodyEl.querySelectorAll('tr')).map(tr=>parseInt(tr.dataset.row));
+
+  bodyEl.querySelectorAll('td').forEach(td=>{
+    td.addEventListener('mousedown', (e)=>{
+      if(e.target.closest('input,button')) return; // let checkbox/kebab work normally
+      const col = parseInt(td.dataset.col);
+      if(columns[col].key==='select' || columns[col].key==='actions') return;
+      clearRowSelection();
+      dragging = true;
+      selectedColIndex = null;
+      const rIdx = currentPageRowOrder.indexOf(parseInt(td.dataset.row));
+      anchor = {r:rIdx, c:col};
+      selectedCells.clear();
+      selectedCells.add(rIdx+'-'+col);
+      applyCellHighlight();
+      lastClientX = e.clientX; lastClientY = e.clientY;
+      startEdgeScrollLoop();
+      e.preventDefault();
+    });
+  });
+}
+
+// Document-level mousemove: reliably tracks which cell is under the cursor even
+// during fast drags, instead of relying solely on per-cell mouseenter events.
+document.addEventListener('mousemove', (e)=>{
+  if(!dragging || !anchor) return;
+  lastClientX = e.clientX; lastClientY = e.clientY;
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const td = el ? el.closest('td') : null;
+  if(!td || !bodyEl.contains(td)) return;
+  const col = parseInt(td.dataset.col);
+  if(columns[col].key==='select' || columns[col].key==='actions') return;
+  const rIdx = currentPageRowOrder.indexOf(parseInt(td.dataset.row));
+  if(rIdx===-1) return;
+  selectRange(anchor.r, anchor.c, rIdx, col);
+});
+
+function selectRange(r1,c1,r2,c2){
+  const rMin=Math.min(r1,r2), rMax=Math.max(r1,r2);
+  const cMin=Math.min(c1,c2), cMax=Math.max(c1,c2);
+  selectedCells.clear();
+  for(let r=rMin;r<=rMax;r++){
+    for(let c=cMin;c<=cMax;c++){
+      selectedCells.add(r+'-'+c);
+    }
+  }
+  applyCellHighlight();
+}
+
+document.addEventListener('mouseup', ()=>{ dragging=false; });
+
+/* =========================================================
+   APPLY HIGHLIGHT + STATS
+========================================================= */
+function applyCellHighlight(){
+  document.querySelectorAll('td.cell-selected').forEach(td=>td.classList.remove('cell-selected'));
+  document.querySelectorAll('th.col-header-selected').forEach(th=>th.classList.remove('col-header-selected'));
+  document.querySelectorAll('td.col-body-selected').forEach(td=>td.classList.remove('col-body-selected'));
+
+  const statsBar = document.getElementById('statsBar');
+  let values = [];
+  let count = 0;
+
+  if(selectedColIndex!==null){
+    const col = columns[selectedColIndex];
+    const th = headRowEl.querySelector(`th[data-col="${selectedColIndex}"]`);
+    if(th) th.classList.add('col-header-selected');
+    bodyEl.querySelectorAll(`td[data-col="${selectedColIndex}"]`).forEach(td=>{
+      td.classList.add('col-body-selected');
+      count++;
+      if(col.numeric){
+        const n = parseFloat(td.textContent.replace(/[^\d.-]/g,''));
+        if(!isNaN(n)) values.push(n);
+      }
+    });
+  } else if(selectedCells.size>0){
+    selectedCells.forEach(key=>{
+      const [r,c] = key.split('-').map(Number);
+      const rowId = currentPageRowOrder[r];
+      const td = bodyEl.querySelector(`td[data-row="${rowId}"][data-col="${c}"]`);
+      if(td){
+        td.classList.add('cell-selected');
+        count++;
+        if(columns[c].numeric){
+          const n = parseFloat(td.textContent.replace(/[^\d.-]/g,''));
+          if(!isNaN(n)) values.push(n);
+        }
+      }
+    });
+  }
+
+  if(count>1){
+    statsBar.classList.add('show');
+    document.getElementById('statSelected').textContent = count;
+    document.getElementById('statCount').textContent = values.length;
+    const sum = values.reduce((a,b)=>a+b,0);
+    document.getElementById('statSum').textContent = sum.toLocaleString('vi-VN');
+    document.getElementById('statAvg').textContent = values.length ? (sum/values.length).toFixed(1) : '0';
+  } else {
+    statsBar.classList.remove('show');
+  }
+}
+
+document.getElementById('tableScroll').addEventListener('mousedown', (e)=>{
+  if(!e.target.closest('td') && !e.target.closest('th')){
+    selectedCells.clear(); selectedColIndex=null; applyCellHighlight();
+    clearRowSelection();
+  }
+});
+
+// Clicking anywhere outside the table entirely (sidebar, action bar, page
+// background, etc.) also clears whatever is selected, and closes an open
+// column menu if one is open.
+document.addEventListener('mousedown', (e)=>{
+  if(e.target.closest('.col-menu-panel')) return;
+  if(e.target.closest('.fs-panel') || e.target.closest('#btnFilter') || e.target.closest('#btnSort')) return;
+  closeFsPanel();
+  if(e.target.closest('#tableScroll')) return; // already handled above
+  closeColumnMenu();
+  if(selectedCells.size>0 || selectedColIndex!==null){
+    selectedCells.clear(); selectedColIndex=null; applyCellHighlight();
+  }
+  clearRowSelection();
+});
+
+/* =========================================================
+   COLUMN RESIZE
+========================================================= */
+let resizing = null;
+document.addEventListener('mousedown', (e)=>{
+  const handle = e.target.closest('.resize-handle');
+  if(!handle) return;
+  const ci = parseInt(handle.dataset.col);
+  const colEl = document.getElementById('col-'+ci);
+  resizing = { ci, startX: e.clientX, startWidth: colEl.offsetWidth };
+  document.body.style.cursor = 'col-resize';
+  e.preventDefault();
+});
+document.addEventListener('mousemove', (e)=>{
+  if(!resizing) return;
+  const delta = e.clientX - resizing.startX;
+  const newWidth = Math.max(50, resizing.startWidth + delta);
+  const colEl = document.getElementById('col-'+resizing.ci);
+  colEl.style.width = newWidth + 'px';
+  columns[resizing.ci].width = newWidth;
+  const th = headRowEl.querySelector(`th[data-col="${resizing.ci}"]`);
+  if(th) th.style.width = newWidth+'px';
+  bodyEl.querySelectorAll(`td[data-col="${resizing.ci}"]`).forEach(td=> td.style.width = newWidth+'px');
+  // recompute sticky-left offsets for columns after a resized sticky col
+  refreshStickyOffsets();
+});
+document.addEventListener('mouseup', ()=>{
+  if(resizing){ resizing=null; document.body.style.cursor=''; }
+});
+
+function refreshStickyOffsets(){
+  pinnedCols.forEach(i=>{
+    const off = stickyLeftOffset(i);
+    const th = headRowEl.querySelector(`th[data-col="${i}"]`);
+    if(th) th.style.left = off+'px';
+    bodyEl.querySelectorAll(`td[data-col="${i}"]`).forEach(td=> td.style.left = off+'px');
+  });
+}
+
+/* =========================================================
+   PAGINATION
+========================================================= */
+function updatePaginationUI(start, count, total){
+  document.getElementById('pageInfo').textContent = count>0 ? `${start+1}–${start+count} / ${total}` : `0 / ${total}`;
+  document.getElementById('pageNum').textContent = currentPage;
+  document.getElementById('prevPage').disabled = currentPage===1;
+  document.getElementById('nextPage').disabled = start+count>=total;
+}
+document.getElementById('rowsPerPage').addEventListener('change', (e)=>{
+  rowsPerPage = parseInt(e.target.value);
+  currentPage = 1;
+  renderRows();
+});
+document.getElementById('prevPage').addEventListener('click', ()=>{
+  if(currentPage>1){ currentPage--; renderRows(); }
+});
+document.getElementById('nextPage').addEventListener('click', ()=>{
+  if(currentPage*rowsPerPage < rows.length){ currentPage++; renderRows(); }
+});
+
+/* =========================================================
+   MISC: search (client-side filter demo), refresh spin
+========================================================= */
+document.getElementById('searchInput').addEventListener('input', (e)=>{
+  const q = e.target.value.trim().toLowerCase();
+  document.querySelectorAll('#bodyRows tr').forEach(tr=>{
+    const text = tr.textContent.toLowerCase();
+    tr.style.display = text.includes(q) ? '' : 'none';
+  });
+});
+document.getElementById('btnRefresh').addEventListener('click', (e)=>{
+  const svg = e.currentTarget.querySelector('svg');
+  svg.style.transition='transform .5s ease';
+  svg.style.transform='rotate(360deg)';
+  setTimeout(()=>{ svg.style.transition=''; svg.style.transform=''; }, 500);
+});
+
+/* =========================================================
+   COPY LIKE EXCEL (Ctrl/Cmd+C)
+   Copies whatever is currently selected — a dragged cell range,
+   a whole column, or checked rows — as tab-separated text so it
+   pastes cleanly into Excel / Google Sheets / Lark Base.
+========================================================= */
+function getCellText(td){
+  return td ? td.textContent.trim() : '';
+}
+
+function buildClipboardText(){
+  if(selectedCells.size>0){
+    const coords = Array.from(selectedCells).map(k=>k.split('-').map(Number));
+    const rs = [...new Set(coords.map(c=>c[0]))].sort((a,b)=>a-b);
+    const cs = [...new Set(coords.map(c=>c[1]))].sort((a,b)=>a-b);
+    return rs.map(r=>{
+      const rowId = currentPageRowOrder[r];
+      return cs.map(c=>getCellText(bodyEl.querySelector(`td[data-row="${rowId}"][data-col="${c}"]`))).join('\t');
+    }).join('\n');
+  }
+  if(selectedColIndex!==null){
+    const col = columns[selectedColIndex];
+    const vals = Array.from(bodyEl.querySelectorAll(`td[data-col="${selectedColIndex}"]`)).map(getCellText);
+    return [col.label, ...vals].join('\n');
+  }
+  if(selectedRowIds.size>0){
+    const dataCols = columns.filter(c=>c.key!=='select' && c.key!=='actions');
+    const header = dataCols.map(c=>c.label).join('\t');
+    const lines = rows.filter(r=>selectedRowIds.has(r.id)).map(r=>{
+      const tr = bodyEl.querySelector(`tr[data-row="${r.id}"]`);
+      if(!tr) return null;
+      return dataCols.map(c=>{
+        const idx = columns.indexOf(c);
+        return getCellText(tr.querySelector(`td[data-col="${idx}"]`));
+      }).join('\t');
+    }).filter(Boolean);
+    return lines.length ? [header, ...lines].join('\n') : '';
+  }
+  return '';
+}
+
+let toastTimer;
+function showToast(msg){
+  let t = document.getElementById('toastEl');
+  if(!t){ t = document.createElement('div'); t.id='toastEl'; t.className='toast'; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 1600);
+}
+
+async function copySelectionToClipboard(){
+  const text = buildClipboardText();
+  if(!text) return;
+  const rowCount = text.split('\n').length;
+  try{
+    await navigator.clipboard.writeText(text);
+  }catch(err){
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); }catch(e2){}
+    document.body.removeChild(ta);
+  }
+  showToast(`Đã copy ${rowCount} dòng vào clipboard — dán được vào Excel`);
+}
+
+document.addEventListener('keydown', (e)=>{
+  const isCopy = (e.ctrlKey || e.metaKey) && (e.key==='c' || e.key==='C');
+  if(!isCopy) return;
+  const tag = (e.target.tagName||'').toLowerCase();
+  const isTextField = tag==='textarea' || (tag==='input' && !['checkbox','radio','button'].includes(e.target.type));
+  if(isTextField) return; // don't hijack copy inside real text fields; checkboxes are fine
+  copySelectionToClipboard();
+});
+
+/* =========================================================
+   "Fields" button: quick way to unhide columns / reset freeze,
+   since the header dropdown can hide columns and pin frozen ones.
+========================================================= */
+document.getElementById('btnFields').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  const hidden = columns.filter(c=>c.hidden);
+  const pinned = Array.from(pinnedCols).filter(i=>columns[i].key!=='select').sort((a,b)=>a-b);
+  closeColumnMenu();
+  const menu = document.createElement('div');
+  menu.className = 'col-menu-panel';
+  const items = [];
+  if(pinned.length){
+    items.push('<div class="col-menu-item" style="color:var(--neutral-600);cursor:default;font-size:12px;">Đang ghim</div>');
+    pinned.forEach(i=>{
+      items.push(`<div class="col-menu-item" data-unpin="${i}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 3l18 18M12 2v6M4 8l3.2 1.6M20 8l-4 2M4 16l8 4 8-4M8.5 13L4 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Bỏ ghim "${columns[i].label}"</span></div>`);
+    });
+    items.push('<div class="col-menu-divider"></div>');
+  }
+  if(hidden.length){
+    items.push('<div class="col-menu-item" style="color:var(--neutral-600);cursor:default;font-size:12px;">Đang ẩn</div>');
+    hidden.forEach(c=>{
+      items.push(`<div class="col-menu-item" data-unhide="${columns.indexOf(c)}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/></svg><span>Hiện lại "${c.label}"</span></div>`);
+    });
+  }
+  if(!pinned.length && !hidden.length){
+    items.push('<div class="col-menu-item" style="color:var(--neutral-600);cursor:default;">Chưa ghim hay ẩn cột nào</div>');
+  }
+  menu.innerHTML = items.join('');
+  document.body.appendChild(menu);
+  const btnRect = e.currentTarget.getBoundingClientRect();
+  const mr = menu.getBoundingClientRect();
+  menu.style.left = Math.max(8, Math.min(btnRect.right-mr.width, window.innerWidth-mr.width-8)) + 'px';
+  menu.style.top = (btnRect.bottom+4) + 'px';
+  menu.querySelectorAll('[data-unhide]').forEach(item=>{
+    item.addEventListener('click', ()=>{
+      columns[parseInt(item.dataset.unhide)].hidden = false;
+      renderHeader(); renderRows(); closeColumnMenu();
+    });
+  });
+  menu.querySelectorAll('[data-unpin]').forEach(item=>{
+    item.addEventListener('click', ()=>{
+      pinnedCols.delete(parseInt(item.dataset.unpin));
+      renderHeader(); renderRows(); closeColumnMenu();
+    });
+  });
+  openMenuEl = menu;
+});
+
+/* =========================================================
+   FILTER PANEL ("Bộ lọc" button)
+========================================================= */
+let openFsPanelEl = null;
+function closeFsPanel(){
+  if(openFsPanelEl){ openFsPanelEl.remove(); openFsPanelEl = null; }
+}
+
+function positionPanelBelow(panel, btn){
+  const r = btn.getBoundingClientRect();
+  document.body.appendChild(panel);
+  const pr = panel.getBoundingClientRect();
+  let left = r.left;
+  if(left + pr.width > window.innerWidth - 8) left = window.innerWidth - pr.width - 8;
+  let top = r.bottom + 6;
+  if(top + pr.height > window.innerHeight - 8) top = Math.max(8, r.top - pr.height - 6);
+  panel.style.left = Math.max(8,left) + 'px';
+  panel.style.top = Math.max(8,top) + 'px';
+}
+
+function conditionOptionsHtml(field, selected){
+  const kind = fieldKind[field];
+  return conditionsByKind[kind].map(c=>`<option value="${c.v}" ${c.v===selected?'selected':''}>${c.l}</option>`).join('');
+}
+
+function valueInputHtml(field, condition, value){
+  const kind = fieldKind[field];
+  if(condition==='empty' || condition==='not_empty') return '<input class="fs-value" disabled placeholder="—">';
+  if(kind==='select'){
+    const opts = fieldOptions(field);
+    return `<select class="fs-value">${opts.map(o=>`<option value="${o}" ${String(o)===String(value)?'selected':''}>${o}</option>`).join('')}</select>`;
+  }
+  if(kind==='number') return `<input class="fs-value" type="number" value="${value!==undefined?value:''}" placeholder="Giá trị">`;
+  if(kind==='date') return `<input class="fs-value" type="date" value="${value||''}">`;
+  return `<input class="fs-value" type="text" value="${value||''}" placeholder="Giá trị">`;
+}
+
+function fieldOptionsHtml(selected){
+  return filterableFields.map(k=>`<option value="${k}" ${k===selected?'selected':''}>${fieldLabel(k)}</option>`).join('');
+}
+
+function renderFilterRows(container){
+  if(!activeFilters.length){
+    container.innerHTML = '<div class="fs-empty">Chưa có điều kiện lọc nào.</div>';
+    return;
+  }
+  container.innerHTML = activeFilters.map((f,idx)=>`
+    <div class="fs-row" data-idx="${idx}">
+      <select class="fs-field">${fieldOptionsHtml(f.field)}</select>
+      <select class="fs-cond">${conditionOptionsHtml(f.field, f.condition)}</select>
+      ${valueInputHtml(f.field, f.condition, f.value)}
+      <button class="fs-remove" title="Xoá điều kiện"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.fs-row').forEach(rowEl=>{
+    const idx = parseInt(rowEl.dataset.idx);
+    rowEl.querySelector('.fs-field').addEventListener('change', (e)=>{
+      const newField = e.target.value;
+      activeFilters[idx].field = newField;
+      activeFilters[idx].condition = conditionsByKind[fieldKind[newField]][0].v;
+      activeFilters[idx].value = '';
+      renderFilterRows(container);
+      applyFiltersAndSorts();
+    });
+    rowEl.querySelector('.fs-cond').addEventListener('change', (e)=>{
+      activeFilters[idx].condition = e.target.value;
+      renderFilterRows(container);
+      applyFiltersAndSorts();
+    });
+    const valueEl = rowEl.querySelector('.fs-value');
+    if(valueEl && !valueEl.disabled){
+      valueEl.addEventListener('input', (e)=>{ activeFilters[idx].value = e.target.value; applyFiltersAndSorts(); });
+      valueEl.addEventListener('change', (e)=>{ activeFilters[idx].value = e.target.value; applyFiltersAndSorts(); });
+    }
+    rowEl.querySelector('.fs-remove').addEventListener('click', ()=>{
+      activeFilters.splice(idx,1);
+      renderFilterRows(container);
+      applyFiltersAndSorts();
+    });
+  });
+}
+
+function applyFiltersAndSorts(){
+  updateFilterSortBadges();
+  currentPage = 1;
+  columnOverrides = {}; // clear per-column-only sort overrides — the row set/order just changed
+  clearRowSelection();
+  clearCellColumnSelection();
+  renderRows();
+}
+
+document.getElementById('btnFilter').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  if(openFsPanelEl && openFsPanelEl.dataset.kind==='filter'){ closeFsPanel(); return; }
+  closeFsPanel(); closeColumnMenu();
+  const panel = document.createElement('div');
+  panel.className = 'fs-panel';
+  panel.dataset.kind = 'filter';
+  const rowsContainer = document.createElement('div');
+  panel.appendChild(rowsContainer);
+  renderFilterRows(rowsContainer);
+
+  const addBtn = document.createElement('div');
+  addBtn.className = 'fs-add';
+  addBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Thêm điều kiện</span>';
+  addBtn.addEventListener('click', ()=>{
+    const field = filterableFields[0];
+    activeFilters.push({field, condition: conditionsByKind[fieldKind[field]][0].v, value:''});
+    renderFilterRows(rowsContainer);
+    applyFiltersAndSorts();
+  });
+  panel.appendChild(addBtn);
+
+  const footer = document.createElement('div');
+  footer.className = 'fs-footer';
+  footer.innerHTML = '<span class="fs-clear">Xoá tất cả điều kiện</span>';
+  footer.querySelector('.fs-clear').addEventListener('click', ()=>{
+    activeFilters = [];
+    renderFilterRows(rowsContainer);
+    applyFiltersAndSorts();
+  });
+  panel.appendChild(footer);
+
+  positionPanelBelow(panel, e.currentTarget);
+  openFsPanelEl = panel;
+});
+
+/* =========================================================
+   SORT PANEL ("Sắp xếp" button) — sorts the whole table by row,
+   unlike the per-column-only sort in the header right-click menu.
+========================================================= */
+function renderSortRows(container){
+  if(!activeSorts.length){
+    container.innerHTML = '<div class="fs-empty">Chưa có cấp sắp xếp nào — bảng đang hiển thị theo thứ tự mặc định.</div>';
+    return;
+  }
+  container.innerHTML = activeSorts.map((s,idx)=>`
+    <div class="fs-row" data-idx="${idx}">
+      <select class="fs-field">${fieldOptionsHtml(s.field)}</select>
+      <select class="fs-cond" style="flex:1;">
+        <option value="asc" ${s.dir==='asc'?'selected':''}>Tăng dần</option>
+        <option value="desc" ${s.dir==='desc'?'selected':''}>Giảm dần</option>
+      </select>
+      <button class="fs-remove" title="Xoá cấp sắp xếp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.fs-row').forEach(rowEl=>{
+    const idx = parseInt(rowEl.dataset.idx);
+    rowEl.querySelector('.fs-field').addEventListener('change', (e)=>{
+      activeSorts[idx].field = e.target.value;
+      applyFiltersAndSorts();
+    });
+    rowEl.querySelector('.fs-cond').addEventListener('change', (e)=>{
+      activeSorts[idx].dir = e.target.value;
+      applyFiltersAndSorts();
+    });
+    rowEl.querySelector('.fs-remove').addEventListener('click', ()=>{
+      activeSorts.splice(idx,1);
+      renderSortRows(container);
+      applyFiltersAndSorts();
+    });
+  });
+}
+
+document.getElementById('btnSort').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  if(openFsPanelEl && openFsPanelEl.dataset.kind==='sort'){ closeFsPanel(); return; }
+  closeFsPanel(); closeColumnMenu();
+  const panel = document.createElement('div');
+  panel.className = 'fs-panel';
+  panel.dataset.kind = 'sort';
+  const rowsContainer = document.createElement('div');
+  panel.appendChild(rowsContainer);
+  renderSortRows(rowsContainer);
+
+  const addBtn = document.createElement('div');
+  addBtn.className = 'fs-add';
+  addBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Thêm cấp sắp xếp</span>';
+  addBtn.addEventListener('click', ()=>{
+    const field = filterableFields[0];
+    activeSorts.push({field, dir:'asc'});
+    renderSortRows(rowsContainer);
+    applyFiltersAndSorts();
+  });
+  panel.appendChild(addBtn);
+
+  const footer = document.createElement('div');
+  footer.className = 'fs-footer';
+  footer.innerHTML = '<span class="fs-clear">Xoá tất cả</span>';
+  footer.querySelector('.fs-clear').addEventListener('click', ()=>{
+    activeSorts = [];
+    renderSortRows(rowsContainer);
+    applyFiltersAndSorts();
+  });
+  panel.appendChild(footer);
+
+  positionPanelBelow(panel, e.currentTarget);
+  openFsPanelEl = panel;
+});
+
+/* init */
+renderHeader();
+renderRows();
+updateSelectionBar();
+updateFilterSortBadges();
+</script>
+</body>
+</html>
