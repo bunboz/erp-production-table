@@ -650,13 +650,18 @@
   .fp-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
   /* ===== Sticky footer: dòng Tổng dính đáy vùng cuộn, phân trang cố định dưới bảng ===== */
-  .table-body{min-height:calc(100% - 40px);}
+  .table-body{min-height:calc(100% - 44px);}
   .total-bar{
-    position:sticky;bottom:0;left:0;z-index:6;height:40px;display:flex;align-items:center;gap:24px;
-    padding:0 16px;background:var(--bg-100);border-top:1px solid var(--neutral-300);
-    font-size:13px;color:var(--neutral-800);white-space:nowrap;
+    position:sticky;bottom:0;left:0;z-index:6;height:44px;display:flex;align-items:stretch;
+    min-width:100%;background:#eef2f1;border-top:1px solid #c9d3d1;box-shadow:0 -3px 8px rgba(10,30,26,.06);
+    font-size:14px;color:var(--neutral-800);white-space:nowrap;
   }
-  .total-bar b{font-weight:500;color:var(--primary-500);}
+  .tb-cell{flex:none;box-sizing:border-box;padding:0 16px;display:flex;align-items:center;gap:8px;overflow:hidden;background:#eef2f1;border-right:1px solid #d9e0de;}
+  .tb-lbl{color:var(--neutral-700);font-weight:400;font-size:13px;}
+  .tb-cell b{color:var(--neutral-950);font-weight:600;}
+  .tb-of{color:var(--neutral-700);font-weight:400;}
+  .tb-pin{position:sticky;z-index:2;box-shadow:1px 0 4px -1px rgba(0,0,0,.14);}
+  .tb-right{position:sticky;right:0;z-index:2;box-shadow:-1px 0 4px -1px rgba(0,0,0,.14);}
   .page-list{display:flex;gap:6px;align-items:center;}
   .page-btn.active{border-color:var(--primary-500);background:var(--primary-500);color:#fff;font-weight:500;}
   .page-btn.num{width:auto;min-width:28px;padding:0 8px;font-size:13px;font-family:inherit;}
@@ -806,7 +811,7 @@
 
           <!-- SELECTION BAR -->
           <div class="selection-bar" id="selectionBar">
-            <div>Đã chọn <b id="selCount">0 Mã Order</b></div>
+            <div>Đã chọn <b id="selCount">0 dòng</b></div>
             <button class="btn" id="btnPlannedOrder">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
               Tạo Planned Order
@@ -982,72 +987,59 @@ document.getElementById('collapseBtn').addEventListener('click', () => {
 ========================================================= */
 const columns = [
   {key:'select', label:'', width:56, sticky:'left-1'},
-  {key:'maOrder', label:'Mã Order', width:130},
-  {key:'orderType', label:'Order Type', width:130},
-  {key:'maKH', label:'Mã khách hàng', width:130},
-  {key:'tenKH', label:'Tên khách hàng', width:190},
-  {key:'khuVuc', label:'Khu vực GH', width:110},
-  {key:'tuoiVang', label:'Tuổi vàng', width:110, numeric:true},
-  {key:'maItem', label:'Mã item - Số lượng', width:210},
-  {key:'tenItem', label:'Tên item', width:170},
-  {key:'tongSL', label:'Tổng SL sản phẩm (pcs)', width:150, numeric:true},
-  {key:'ngayGH', label:'Ngày giao hàng yêu cầu', width:170},
+  {key:'maNL', label:'Mã nguyên liệu', width:150},
+  {key:'tenNL', label:'Tên nguyên liệu', width:190},
+  {key:'loaiNL', label:'Loại', width:170},
+  {key:'mau', label:'Màu', width:120},
+  {key:'tuoi', label:'Tuổi', width:110, numeric:true},
+  {key:'tlDa', label:'TL Đá', width:140, numeric:true},
+  {key:'tlKimLoai', label:'TL kim loại', width:150, numeric:true},
+  {key:'tongTL', label:'Tổng TL', width:140, numeric:true},
+  {key:'kho', label:'Kho', width:210},
+  {key:'soLo', label:'Số lô', width:150},
+  {key:'nhaCC', label:'Nhà cung cấp', width:190},
+  {key:'trangThai', label:'Trạng thái', width:150},
   {key:'ghiChu', label:'Ghi chú', width:200},
-  {key:'ttOrder', label:'Trạng thái Order', width:150},
-  {key:'ttKeHoach', label:'Trạng thái kế hoạch', width:160},
-  {key:'ttSanXuat', label:'Trạng thái sản xuất', width:160},
-  {key:'nguoiTao', label:'Người tạo', width:140},
+  {key:'nguoiCN', label:'Người cập nhật', width:160},
+  {key:'capNhat', label:'Cập nhật cuối', width:180},
   {key:'actions', label:'', width:56, sticky:'right'},
 ];
 
-const customers = [
-  {code:'KH-01234', name:'Jewelry Co. Ltd', region:'Miền Bắc'},
-  {code:'KH-01235', name:'Golden Star Co.', region:'Miền Nam'},
-  {code:'KH-01236', name:'Diamond House', region:'Miền Trung'},
-  {code:'KH-01237', name:'Luxury Gems Ltd', region:'Miền Bắc'},
-  {code:'KH-01238', name:'Bright Jewelry', region:'Miền Nam'},
-];
-const items = [
-  {code:'SP-AU-0012', name:'Nhẫn kim cương'},
-  {code:'SP-AU-0045', name:'Dây chuyền vàng'},
-  {code:'SP-AU-0078', name:'Vòng tay bạc'},
-  {code:'SP-AU-0091', name:'Hoa tai ngọc trai'},
-  {code:'SP-AU-0102', name:'Lắc tay vàng 18K'},
-];
-const gioldAge = ['18K','14K','24K','10K'];
-const zones = ['TP.HCM','Hà Nội','Đà Nẵng','Cần Thơ','Hải Phòng'];
-const creators = ['Nguyễn Văn A','Trần Thị B','Lê Văn C','Phạm Thị D'];
-const ttOrderOpts = [{v:'Mới',c:'grey'},{v:'Đang xử lý',c:'blue'},{v:'Hoàn thành',c:'success'},{v:'Đã huỷ',c:'error'}];
-const ttPlanOpts = [{v:'Chưa lập KH',c:'grey'},{v:'Đã lập KH',c:'blue'},{v:'Đang điều chỉnh',c:'warning'}];
-const ttProdOpts = [{v:'Chưa SX',c:'grey'},{v:'Đang SX',c:'blue'},{v:'Hoàn tất SX',c:'success'}];
+// Định dạng hiển thị: Tuổi 2 số lẻ, các cột trọng lượng 4 số lẻ
+const fmtTuoi = n => Number(n).toFixed(2);
+const fmtTL = n => Number(n).toFixed(4);
+const pad2 = n => String(n).padStart(2,'0');
 
 function pick(arr, i){ return arr[i % arr.length]; }
 
+const tuoiOpts = [75, 99.99, 58.5, 41.7, 99];
+const tenTheoTuoi = {75:'Vàng 18K', 99.99:'Vàng 24K (9999)', 58.5:'Vàng 14K', 41.7:'Vàng 10K', 99:'Vàng 24K (99)'};
+const loaiOpts = ['Nguyên liệu vàng','Phụ liệu đá','Findings'];
+const khoOpts = ['Kho nguyên liệu (Metal)','Kho Finding','Kho nguyên liệu khách'];
+const nguoiOpts = ['Nguyễn Văn A','Trần Thị B','Lê Văn C','Phạm Thị D'];
+const mauOpts = ['Vàng (Y)','Trắng (W)','Hồng (R)'];
+const nhaCCOpts = ['Sevago Metal','Kim Hoàn Á Châu','Gem Supply Co.','Findings VN'];
+const ttOpts = [{v:'Đang dùng',c:'success'},{v:'Chờ kiểm',c:'warning'},{v:'Hết hạn',c:'error'},{v:'Nháp',c:'grey'}];
 const rows = [];
 for(let i=0;i<240;i++){
-  const cust = pick(customers, i);
-  const item = pick(items, i);
-  const orderNo = 'SO-' + String(Math.floor(i/2)+1).padStart(5,'0');
-  rows.push({
-    id: i+1,
-    maOrder: orderNo,
-    orderType: i%5===0 ? 'Group Purchase Order' : 'Sales Order',
-    maKH: cust.code,
-    tenKH: cust.name,
-    region: cust.region,
-    khuVuc: pick(zones, i+1),
-    tuoiVang: pick(gioldAge, i),
-    maItemCode: item.code,
-    maItemQty: (i%6)+2,
-    tenItem: item.name,
-    tongSL: (i%6)+2 + (i%3)*4,
-    ngayGH: `${String((i%28)+1).padStart(2,'0')}-0${(i%9)+1}-2026  ${String(8+(i%9)).padStart(2,'0')}:00`,
-    ghiChu: i%4===0 ? 'Giao trước 10h sáng' : '',   // các dòng còn lại để trống -> hiện "-"
-    ttOrder: pick(ttOrderOpts, i),
-    ttKeHoach: pick(ttPlanOpts, i+1),
-    ttSanXuat: pick(ttProdOpts, i+2),
-    nguoiTao: pick(creators, i),
-  });
+  let ma, tuoi, da, kl, cap, loai, kho, nguoi, mau, soLo, nhaCC, tt, ghiChu;
+  if(i<3){   // 3 dòng đầu giống dữ liệu mẫu trong thiết kế
+    ma = 'ITM-088'; tuoi = i<2 ? 75 : 99.99; da = 5; kl = 115.5; cap = '10:30 28/04/2026';
+    loai = loaiOpts[0]; kho = khoOpts[0]; nguoi = nguoiOpts[0];
+    mau = mauOpts[0]; soLo = 'LOT-2604' + String(1+i).padStart(3,'0'); nhaCC = nhaCCOpts[0]; tt = ttOpts[0]; ghiChu = '';
+  } else {
+    ma = 'ITM-' + String(10 + ((i*7) % 110)).padStart(3,'0');
+    tuoi = tuoiOpts[i % tuoiOpts.length];
+    da = +(((i*37) % 80) / 10).toFixed(4);
+    kl = +(20 + ((i*53) % 1800) / 10).toFixed(4);
+    cap = `${pad2(8 + (i%10))}:${pad2((i*7) % 60)} ${pad2(1 + (i%28))}/${pad2(1 + (i%12))}/2026`;
+    loai = loaiOpts[(i*5) % loaiOpts.length]; kho = khoOpts[(i*3) % khoOpts.length]; nguoi = nguoiOpts[i % nguoiOpts.length];
+    mau = mauOpts[(i*2) % mauOpts.length];
+    soLo = `LOT-26${pad2(1 + (i%12))}${String(100 + ((i*17) % 900))}`;
+    nhaCC = nhaCCOpts[(i*3) % nhaCCOpts.length]; tt = ttOpts[(i*7) % ttOpts.length];
+    ghiChu = i%5===0 ? 'Cần kiểm tra lại' : '';   // để trống -> hiện "-"
+  }
+  rows.push({id:i+1, maNL:ma, tenNL:tenTheoTuoi[tuoi], loaiNL:loai, mau, tuoi, tlDa:da, tlKimLoai:kl, tongTL:+(da+kl).toFixed(4), kho, soLo, nhaCC, trangThai:tt, ghiChu, nguoiCN:nguoi, capNhat:cap});
 }
 
 /* =========================================================
@@ -1179,21 +1171,21 @@ function buildCellsData(r, globalIdx, isSel){
        <span class="idx-num">${globalIdx+1}</span>
        <input type="checkbox" class="row-check idx-check" data-id="${r.id}" ${isSel?'checked':''}>
      </div>`,
-    `<a class="detail-link" href="./detail.html" title="Mở chi tiết MO">${dash(r.maOrder)}</a>`,
-    `<span class="cell-name">${dash(r.orderType)}</span>`,
-    `<span class="cell-name">${dash(r.maKH)}</span>`,
-    `<div class="cell-stack"><span class="cell-name">${dash(r.tenKH)}</span><span class="cell-sub">${dash(r.region)}</span></div>`,
-    `<span class="cell-name">${dash(r.khuVuc)}</span>`,
-    `${badgeHtml({v:r.tuoiVang,c:'warning'})}`,
-    `<span class="cell-name">${r.maItemCode ? r.maItemCode+' ['+r.maItemQty+'],' : dash('')}</span>`,
-    `<span class="cell-name">${dash(r.tenItem)}</span>`,
-    `<span class="cell-name">${dash(r.tongSL)}</span>`,
-    `<span class="cell-name">${dash(r.ngayGH)}</span>`,
+    `<span class="cell-name">${dash(r.maNL)}</span>`,
+    `<span class="cell-name">${dash(r.tenNL)}</span>`,
+    `<span class="cell-name">${dash(r.loaiNL)}</span>`,
+    `<span class="cell-name">${dash(r.mau)}</span>`,
+    `<span class="cell-name">${dash(fmtTuoi(r.tuoi))}</span>`,
+    `<span class="cell-name">${dash(fmtTL(r.tlDa))}</span>`,
+    `<span class="cell-name">${dash(fmtTL(r.tlKimLoai))}</span>`,
+    `<span class="cell-name">${dash(fmtTL(r.tongTL))}</span>`,
+    `<span class="cell-name">${dash(r.kho)}</span>`,
+    `<span class="cell-name">${dash(r.soLo)}</span>`,
+    `<span class="cell-name">${dash(r.nhaCC)}</span>`,
+    `${badgeHtml(r.trangThai)}`,
     `<span class="cell-name">${dash(r.ghiChu)}</span>`,
-    `${badgeHtml(r.ttOrder)}`,
-    `${badgeHtml(r.ttKeHoach)}`,
-    `${badgeHtml(r.ttSanXuat)}`,
-    `<span class="cell-name">${dash(r.nguoiTao)}</span>`,
+    `<span class="cell-name">${dash(r.nguoiCN)}</span>`,
+    `<span class="cell-name">${dash(r.capNhat)}</span>`,
     `<button class="kebab-btn" title="Tuỳ chọn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="19" r="1.6" fill="currentColor"/></svg></button>`,
   ];
 }
@@ -1306,7 +1298,7 @@ function retryLoad(){ loadState='idle'; loadMore(); }
    SELECTION: rows / checkboxes
 ========================================================= */
 function updateSelectionBar(){
-  document.getElementById('selCount').textContent = `${selectedRowIds.size} Mã Order`;
+  document.getElementById('selCount').textContent = `${selectedRowIds.size} dòng`;
   document.getElementById('selectionBar').classList.toggle('show', selectedRowIds.size>0);
   const selectAllEl = document.getElementById('selectAll');
   const total = rows.length;
@@ -1482,27 +1474,26 @@ function attachColumnSelectEvents(){
    COLUMN HEADER DROPDOWN: sort, freeze, hide
 ========================================================= */
 const columnAccessors = {
-  maOrder: r=>r.maOrder,
-  orderType: r=>r.orderType,
-  maKH: r=>r.maKH,
-  tenKH: r=>r.tenKH,
-  khuVuc: r=>r.khuVuc,
-  tuoiVang: r=>parseInt(r.tuoiVang)||0,
-  maItem: r=>r.maItemCode,
-  tenItem: r=>r.tenItem,
-  tongSL: r=>r.tongSL,
-  ngayGH: r=>parseVNDate(r.ngayGH),
+  maNL: r=>r.maNL,
+  tenNL: r=>r.tenNL,
+  loaiNL: r=>r.loaiNL,
+  mau: r=>r.mau,
+  tuoi: r=>r.tuoi,
+  tlDa: r=>r.tlDa,
+  tlKimLoai: r=>r.tlKimLoai,
+  tongTL: r=>r.tongTL,
+  kho: r=>r.kho,
+  soLo: r=>r.soLo,
+  nhaCC: r=>r.nhaCC,
+  trangThai: r=>r.trangThai.v,
   ghiChu: r=>r.ghiChu,
-  ttOrder: r=>r.ttOrder.v,
-  ttKeHoach: r=>r.ttKeHoach.v,
-  ttSanXuat: r=>r.ttSanXuat.v,
-  nguoiTao: r=>r.nguoiTao,
+  nguoiCN: r=>r.nguoiCN,
+  capNhat: r=>parseCapNhat(r.capNhat),
 };
-
-function parseVNDate(s){
-  const m = /(\d{2})-(\d{2})-(\d{4})\s+(\d{2}):(\d{2})/.exec(s||'');
-  if(!m) return 0;
-  return new Date(+m[3], +m[2]-1, +m[1], +m[4], +m[5]).getTime();
+// "10:30 28/04/2026" -> timestamp
+function parseCapNhat(s){
+  const m = /(\d{2}):(\d{2})\s+(\d{2})\/(\d{2})\/(\d{4})/.exec(s||'');
+  return m ? new Date(+m[5], +m[4]-1, +m[3], +m[1], +m[2]).getTime() : 0;
 }
 
 /* =========================================================
@@ -1511,11 +1502,10 @@ function parseVNDate(s){
    reorders the whole row (unlike the per-column-only sort in the
    header right-click menu).
 ========================================================= */
-const filterableFields = ['maOrder','orderType','maKH','tenKH','khuVuc','tuoiVang','maItem','tenItem','tongSL','ngayGH','ghiChu','ttOrder','ttKeHoach','ttSanXuat','nguoiTao'];
+const filterableFields = ['maNL','tenNL','loaiNL','mau','tuoi','tlDa','tlKimLoai','tongTL','kho','soLo','nhaCC','trangThai','ghiChu','nguoiCN','capNhat'];
 const fieldKind = {
-  maOrder:'text', orderType:'select', maKH:'text', tenKH:'text', khuVuc:'select',
-  tuoiVang:'select', maItem:'text', tenItem:'text', tongSL:'number', ngayGH:'date',
-  ghiChu:'text', ttOrder:'select', ttKeHoach:'select', ttSanXuat:'select', nguoiTao:'select',
+  maNL:'text', tenNL:'text', loaiNL:'select', mau:'select', tuoi:'number', tlDa:'number', tlKimLoai:'number', tongTL:'number',
+  kho:'select', soLo:'text', nhaCC:'select', trangThai:'select', ghiChu:'text', nguoiCN:'select', capNhat:'date',
 };
 function fieldLabel(key){
   const col = columns.find(c=>c.key===key);
@@ -1523,7 +1513,7 @@ function fieldLabel(key){
 }
 function fieldOptions(key){
   const accessor = columnAccessors[key];
-  const raw = key==='tuoiVang' ? rows.map(r=>r.tuoiVang) : rows.map(accessor);
+  const raw = rows.map(accessor);
   return [...new Set(raw)].sort();
 }
 
@@ -1541,9 +1531,9 @@ let activeFilters = []; // {field, condition, value}
 let activeSorts = [];   // {field, dir:'asc'|'desc'}
 
 function cellKeyValue(row, key){
-  if(key==='ngayGH') return row.ngayGH;
-  if(key==='maItem') return row.maItemCode;
-  if(key==='tuoiVang') return row.tuoiVang;
+  if(key==='capNhat') return row.capNhat;
+  if(key==='tuoi') return fmtTuoi(row.tuoi);
+  if(key==='tlDa' || key==='tlKimLoai' || key==='tongTL') return fmtTL(row[key]);
   const a = columnAccessors[key];
   return a ? String(a(row)) : '';
 }
@@ -1553,7 +1543,7 @@ function matchesFilter(row, f){
   const accessor = columnAccessors[f.field];
   if(!accessor) return true;
   if(kind==='text' || kind==='select'){
-    const raw = f.field==='tuoiVang' ? row.tuoiVang : accessor(row);
+    const raw = accessor(row);
     const sv = String(raw).toLowerCase();
     const fv = String(f.value||'').toLowerCase();
     switch(f.condition){
@@ -1676,11 +1666,24 @@ function closeColumnMenu(){
   if(openMenuEl){ openMenuEl.remove(); openMenuEl = null; }
 }
 
+// Ghim giống "Freeze panes" của Excel: ghim cột nào thì MỌI cột bên trái nó (theo thứ tự đang hiển thị) cũng được ghim.
+// Bỏ ghim (ở bất kỳ cột nào đang ghim) là bỏ ghim TẤT CẢ, giống "Unfreeze panes" của Excel.
+const isDataCol = i => columns[i].key!=='select' && columns[i].key!=='actions';
 function togglePin(colIndex){
-  if(pinnedCols.has(colIndex)) pinnedCols.delete(colIndex);
-  else pinnedCols.add(colIndex);
+  const pos = colOrder.indexOf(colIndex);
+  if(pinnedCols.has(colIndex)){
+    columns.forEach((_,i)=>{ if(isDataCol(i)) pinnedCols.delete(i); });
+  } else {
+    colOrder.slice(0, pos+1).filter(isDataCol).forEach(i=>pinnedCols.add(i));
+  }
   renderHeader();
   renderRows();
+}
+// Sau khi đổi thứ tự cột hoặc nạp View: đảm bảo phần ghim luôn là một dải liền từ trái sang
+function normalizePinned(){
+  let last = -1;
+  colOrder.forEach((i,p)=>{ if(isDataCol(i) && pinnedCols.has(i)) last = p; });
+  colOrder.slice(0, last+1).filter(isDataCol).forEach(i=>pinnedCols.add(i));
 }
 
 // Right-click on a header cell opens the column menu (sort / pin / hide),
@@ -1947,6 +1950,7 @@ function applyColumnWidth(ci, width){
   });
 
   syncTableWidth();
+  renderTotals();
   // Important when the resized column itself is pinned: every pinned column
   // after it must immediately receive a new left offset.
   refreshStickyOffsets();
@@ -2185,10 +2189,39 @@ window.addEventListener('resize', ()=>{
 /* =========================================================
    PAGINATION
 ========================================================= */
+// Thanh tổng dính đáy, chia theo cột: cột đầu ghi "Tổng"; chỉ những cột liệt kê trong SUM_COLS mới hiện tổng
+// (giá trị = số chữ số thập phân), nằm đúng dưới cột đó; các cột còn lại (Tuổi, Cập nhật cuối) để trống.
+const SUM_COLS = { tlDa:4, tlKimLoai:4, tongTL:4 };
+let totalsList = [];
 function renderTotals(list){
-  const sum = list.reduce((a,r)=>a+r.tongSL,0);
-  document.getElementById('totalBar').innerHTML =
-    `<span>Tổng: <b>${list.length} Order</b></span><span>Tổng SL sản phẩm: <b>${sum.toLocaleString('vi-VN')}</b> pcs</span>`;
+  if(list) totalsList = list;
+  const bar = document.getElementById('totalBar');
+  const vis = visibleColumns();
+  const sums = {};
+  Object.keys(SUM_COLS).forEach(k=>{ const acc = columnAccessors[k]; if(acc) sums[k] = totalsList.reduce((a,r)=>a+(Number(acc(r))||0),0); });
+  const firstData = vis.find(({c})=>c.key!=='select' && c.key!=='actions');
+  bar.style.width = vis.reduce((t,{c})=>t+c.width,0) + 'px';
+  // Mỗi cột -> 1 ô; các ô liền nhau không có số liệu (và cùng trạng thái ghim) gộp thành 1 ô trải dài,
+  // nên chữ "Tổng" tràn qua các cột trống, không bị vạch ngăn giữa chừng.
+  const cells = [];
+  vis.forEach(({c,i})=>{
+    const data = isDataCol(i), hasSum = c.key in sums, pinned = pinnedCols.has(i);
+    let txt = '', cls = '';
+    if(firstData && i===firstData.i) txt = '<b>Tổng</b>';
+    else if(hasSum){
+      const d = SUM_COLS[c.key];
+      txt = `<b>${sums[c.key].toLocaleString('en-US',{minimumFractionDigits:d, maximumFractionDigits:d})}</b>`; cls = ' tb-sum';
+    }
+    const mergeable = data && !hasSum;
+    const prev = cells[cells.length-1];
+    if(prev && prev.mergeable && mergeable && prev.pinned===pinned){ prev.width += c.width; return; }
+    cells.push({i, width:c.width, txt, cls, pinned, right:c.sticky==='right', mergeable});
+  });
+  bar.innerHTML = cells.map(k=>{
+    const cls = 'tb-cell' + k.cls + (k.pinned?' tb-pin':'') + (k.right?' tb-right':'');
+    const left = k.pinned ? `left:${stickyLeftOffset(k.i)}px;` : '';
+    return `<div class="${cls}" data-col="${k.i}" style="width:${k.width}px;${left}">${k.txt}</div>`;
+  }).join('');
 }
 (function buildPager(){
   const prev = document.getElementById('prevPage'), next = document.getElementById('nextPage');
@@ -2376,6 +2409,7 @@ function reorderField(fromI, toI, after){
   let pos = mid.indexOf(toI); if(after) pos++;
   mid.splice(pos,0,fromI);
   colOrder = [sel, ...mid, act];
+  normalizePinned();
   renderHeader(); renderRows(); renderFieldsPanel();
 }
 function renderFieldsPanel(){
@@ -2389,7 +2423,7 @@ function renderFieldsPanel(){
       return `<div class="fp-item" draggable="true" data-i="${i}">
         <span class="fp-grip" title="Kéo để đổi thứ tự"><svg width="12" height="14" viewBox="0 0 12 16" fill="currentColor"><circle cx="3" cy="3" r="1.3"/><circle cx="9" cy="3" r="1.3"/><circle cx="3" cy="8" r="1.3"/><circle cx="9" cy="8" r="1.3"/><circle cx="3" cy="13" r="1.3"/><circle cx="9" cy="13" r="1.3"/></svg></span>
         <span class="fp-label">${c.label}</span>
-        <button class="fp-pin ${pinnedCols.has(i)?'on':''}" title="${pinnedCols.has(i)?'Bỏ ghim':'Ghim cột'}" aria-label="Ghim cột ${c.label}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M4 8l8-4 8 4M4 16l8 4 8-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="fp-pin ${pinnedCols.has(i)?'on':''}" title="${pinnedCols.has(i)?'Bỏ ghim tất cả':'Ghim đến cột này'}" aria-label="Ghim cột ${c.label}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M4 8l8-4 8 4M4 16l8 4 8-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <input type="checkbox" ${c.hidden?'':'checked'} ${(!c.hidden && visibleCount<=1)?'disabled':''} aria-label="Hiện cột ${c.label}">
       </div>`;}).join('')}</div>`;
   const list = fieldsPanelEl.querySelector('.fp-list');
@@ -2649,7 +2683,7 @@ function distinctWithCounts(key){
   rows.forEach(r=>{ const v = String(cellKeyValue(r,key)); m.set(v,(m.get(v)||0)+1); });
   const kind = fieldKind[key];
   return [...m.entries()].sort((a,b)=>{
-    if(kind==='date') return parseVNDate(a[0]) - parseVNDate(b[0]);
+    if(kind==='date') return parseCapNhat(a[0]) - parseCapNhat(b[0]);
     if(kind==='number') return Number(a[0]) - Number(b[0]);
     return a[0].localeCompare(b[0],'vi',{numeric:true});
   });
@@ -2797,7 +2831,7 @@ function openColumnContextMenu(ci, x, y){
       <div class="col-menu-divider"></div>
       <div class="col-menu-item" data-act="hide">${I.hide}<span>Ẩn cột</span></div>
       <div class="col-menu-item" data-act="width">${I.width}<span>Độ rộng cột</span></div>
-      <div class="col-menu-item" data-act="pin">${I.pin}<span>${pinned?'Bỏ ghim cột':'Ghim cột'}</span></div>
+      <div class="col-menu-item" data-act="pin">${I.pin}<span>${pinned?'Bỏ ghim tất cả':'Ghim đến cột này'}</span></div>
       <div class="col-menu-divider"></div>
       <div class="col-menu-item" data-act="filter">${I.filter}<span>${colFilterOn(columns[ci].key)?'Tắt bộ lọc cột này':'Tạo bộ lọc'}</span></div>
       <div class="col-menu-divider"></div>
@@ -2949,7 +2983,7 @@ function openExportDialog(opts){
 function exportData(withImages){
   const cols = visibleColumns().filter(({c})=>c.key!=='select' && c.key!=='actions');
   const list = getDisplayRows();
-  const val = (r,c)=> c.key==='maItem' ? `${r.maItemCode} [${r.maItemQty}]` : cellKeyValue(r, c.key);
+  const val = (r,c)=> cellKeyValue(r, c.key);
   // Dữ liệu mẫu chưa có ảnh nên chế độ "Có hình ảnh" hiện cho ra cùng nội dung; withImages để nối ảnh thật khi có.
   const q = v => '"' + String(v ?? '').replace(/"/g,'""') + '"';
   const csv = [cols.map(({c})=>q(c.label)).join(','), ...list.map(r=>cols.map(({c})=>q(val(r,c))).join(','))].join('\r\n');
@@ -2981,7 +3015,7 @@ document.getElementById('btnExport').addEventListener('click', ()=>{
    "Tất cả" là view mặc định có sẵn — không đổi tên / xoá được.
    Nút "Chế độ xem" hiện chấm cam khi cấu hình hiện tại khác view đang chọn.
 ========================================================= */
-const VIEWS_KEY = 'erp-nhu-cau-views-v1';
+const VIEWS_KEY = 'erp-nguyen-lieu-views-v3';
 const DEFAULT_VIEW_ID = 'all';
 const MAX_VIEWS = 30;
 const MAX_VIEW_NAME = 40;
@@ -3046,6 +3080,7 @@ function applyViewState(state, opts){
     const i = columns.findIndex(c=>c.key===k);
     if(i>0) pinnedCols.add(i);
   });
+  normalizePinned();
   activeFilters = cloneJSON(state.filters || []);
   activeSorts = cloneJSON(state.sorts || []);
   filterCols.clear();
